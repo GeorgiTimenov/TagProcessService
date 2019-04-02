@@ -1,0 +1,189 @@
+var express     = require("express"),
+    app         = express(),
+    bodyParser  = require("body-parser"),
+    mongoose    = require("mongoose"),
+    flash       = require("connect-flash"),
+    passport    = require("passport"),
+    LocalStrategy = require("passport-local"),
+    methodOverride = require("method-override"),
+    Campground  = require("./models/campgrounds"),
+    Comment     = require("./models/comment"),
+    User        = require("./models/user"),
+    seedDB      = require("./seeds");
+var fileUpload = require('./lib/index');
+const csv = require('csvtojson');
+
+    
+//requiring routes
+var commentRoutes    = require("./routes/comments"),
+    campgroundRoutes = require("./routes/campgrounds"),
+    indexRoutes      = require("./routes/index");
+
+mongoose.connect("mongodb://localhost/database");
+mongoose.Promise = require('bluebird');
+app.use(bodyParser.urlencoded({extended: true}));
+app.set("view engine", "ejs");
+app.use(express.static(__dirname + "/public"));
+app.use(methodOverride("_method"));
+app.use(flash());
+// seedDB(); //seed the database
+
+// PASSPORT CONFIGURATION
+app.use(require("express-session")({
+    secret: "Once again Rusty wins cutest dog!",
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use(function(req, res, next){
+   res.locals.currentUser = req.user;
+   res.locals.error = req.flash("error");
+   res.locals.success = req.flash("success");
+   next();
+});
+
+app.use("/", indexRoutes);
+app.use("/campgrounds", campgroundRoutes);
+app.use("/campgrounds/:id/comments", commentRoutes);
+
+
+/* app.listen(process.env.PORT, process.env.IP, function(){
+   console.log("The YelpCamp Server Has Started!");
+   console.log(process.env.PORT)
+   
+}); */
+
+// default options
+app.use(fileUpload());
+app.post('/upload', function(req, res) {
+  let sampleFile;
+  let uploadPath;
+
+  if (Object.keys(req.files).length == 0) {
+    
+    res.status(400).send('No files were uploaded.');
+    return;
+  }
+
+  //console.log('req.files >>>', req.files); // eslint-disable-line
+  //console.log("minetype=>"+ req.files.sampleFile.minetype);
+    if(req.files.sampleFile.mimetype == 'application/vnd.ms-excel') {
+    sampleFile = req.files.sampleFile;
+    //console.log("DateType=>"+typeof(Date.now()));
+
+    //console.log("Date=>"+Date.now());
+
+    uploadPath = __dirname + '/uploads/' + Date.now()+sampleFile.name;
+
+    sampleFile.mv(uploadPath, function(err) {
+      if (err) {
+        return res.status(500).send(err);
+      }
+     
+      
+    });
+    /** csv file
+a,b,c
+1,2,3
+4,5,6
+*/
+const csvFilePath = uploadPath;
+//const outputPath = __dirname + '/uploads'+ Date.now()+'output.csv';
+csv()
+.fromFile(csvFilePath)
+.then((jsonObj)=>{
+    console.log(jsonObj);
+    /**
+     * [
+     * 	{a:"1", b:"2", c:"3"},
+     * 	{a:"4", b:"5". c:"6"}
+     * ]
+     */ 
+    var result = [];
+    var searchquery=[];
+    var regex =[];
+    var searchData=[];
+    var noMatch = null;
+    for (var i in jsonObj) {
+      console.log("JSON => "+JSON.stringify(jsonObj[i]));
+      result[i] = JSON.stringify(jsonObj[i]);
+      searchquery[i] = result[i].slice(result[i].length-7,result[i].length-2).trim();
+            /* searchquery[i] = Number(searchquery[i]);
+            if (searchquery[i] < 80000 && searchquery[i] > 81659) {
+                
+            } */
+      regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
+             //console.log("search query=" +i+ "=>"+regex[i]); 
+    }
+    Campground.find({zipcodes: regex}, function(err, allCampgrounds){
+      if(err){
+              console.log(err);
+      } else {
+          
+              if(allCampgrounds.length < 1) {
+                  noMatch = "No courts match that query, please try again.";
+              } else{
+              
+              //console.log("alllcamp=>"+ allCampgrounds);
+              for (var i = 0; i< result.length; i ++) {
+                  for (var j = 0; j< allCampgrounds.length; j ++) {
+                      //console.log("allcamp => "+ allCampgrounds);
+                      //console.log("allcamp[j] => "+ allCampgrounds[j]);
+                      var temp= {};
+                      if(allCampgrounds[j].zipcodes.includes(searchquery[i])){
+                         
+                          temp.num = i + 1 ;
+                          if (i == result.length - 1 ) temp.search = result[i]+"\n";
+                          else {temp.search = result[i];}
+                          temp.districtNum =allCampgrounds[j].judicalDistrictNum;
+                          temp.courtName = allCampgrounds[j].courtName + " Court";
+                          temp.address = allCampgrounds[j].address;
+                          temp.phone = allCampgrounds[j].phone;
+                          searchData.push(temp); break;
+                      } else {
+                          if (j == allCampgrounds.length - 1) {
+                          temp.num = i + 1;
+                          if (i == result.length - 1 ) temp.search = result[i]+"\n";
+                          else {temp.search = result[i];}
+                          temp.courtName = "Sorry, We can't find the proper Court\n Please type correct Address"
+                          searchData.push(temp);
+                          }
+                      }
+                  }   
+              }
+              //console.log("Search Data =>"+searchData);
+              
+          } 
+          //res.render("campgrounds/index",{campgrounds:searchData,noMatch: noMatch});  
+          console.log("search => "+ searchData)
+      }
+                  
+  });
+    console.log("regex => "+ regex)
+    //console.log("JSON Length= "+jsonObj.length);
+    //var myJSON = JSON.stringify(jsonObj[1]. Address);
+    
+    //res.render("campgrounds/index",{campgrounds:null,noMatch:myJSON });
+})
+  
+// Async / await usage
+//const jsonArray=await csv().fromFile(csvFilePath);
+    } else {
+      var noMatch = 'Sorry, File uploaded failed: Try to upload csv file ';
+      res.render("campgrounds/index",{campgrounds:null,noMatch: noMatch}); 
+    }
+});
+
+var port =3000;
+app.listen(port, () => {
+   console.log("Server listening on port " + port);
+});
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
+

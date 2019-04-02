@@ -1,0 +1,188 @@
+<% include ../partials/header %>
+
+<div class="container">
+    <header class="jumbotron landing-header">
+        <div class="container">
+            <div style="text-align:center">
+                <h2>Welcome To <strong>Tag Process Service - Court Locator</strong></h2>
+            </div>
+            <p>
+
+                <!--  <a class="btn btn-primary btn-large" href="/campgrounds/new">Add New Courts</a> -->
+
+            </p>
+
+            <p>
+                <form action="/campgrounds" method="GET" class="landing-header form-inline">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-4 text-center">
+                                <textarea name="search" id="inputData" class="landing-header"
+                                    placeholder="Enter your address" rows="25" cols="40" wrap="hard" autofocus
+                                    required></textarea>
+                            </div>
+
+                            <div class="col-sm-6 col-md-8" style="height:480px;overflow:auto;" class="table-responsive">
+
+                                <table style="background-color: #ffffff;">
+
+
+                                    <%if(campgrounds !== null){%>
+                                    <% campgrounds.forEach(function(campground){ %>
+                                    <tr>
+                                        <th>Input</th>
+                                        <th>Output</th>
+                                    </tr>
+                                    <tr>
+                                        <td><%= campground.search%></td>
+                                        <td><%= campground.courtName%></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td><%= campground.address%></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td><%= campground.phone%></td>
+                                    </tr>
+                                    <tr></tr>
+                                    <% }); %>
+                                    <% } %>
+
+                                </table>
+
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class="row" style="text-align:center">
+                            <input type="submit" value="Search" class="btn btn-success btn-lg">
+                        </div>
+                    </div>
+                </form>
+            </p>
+            <% if(noMatch !== null) { %>
+            <h3 style="text-align: center"><%= noMatch %></h3>
+            <% } %>
+            <% if(currentUser){ %>
+            
+            <div class="col-md-10 text-center">
+                    <% if(currentUser.subscription){ %>
+                <h3>Upload your csv file</h3>
+                <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data">
+                    <!-- COMPONENT START -->
+                    <div class="form-group">
+                        <div class="input-group input-file" name="Fichier1">
+                            <span class="input-group-btn">
+                                <input type="file" class="btn btn-default" name="sampleFile">Choose</button>
+                            </span>
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary">Upload address File</button>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- COMPONENT END -->
+                </form>
+                <form ref='uploadForm' id='uploadForm' action='/download' method='POST' encType="multipart/form-data">
+                    <!-- COMPONENT START -->
+                    <div class="form-group">
+                        <div class="text-center" name="Fichier1">
+
+                            <button type="submit" class="btn btn-success text-center">Download Result File</button>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- COMPONENT END -->
+                </form>
+                <form ref='Cancel' id='cancel' action='/downgrade/<%=currentUser.username %>' method='POST' >
+                    <!-- COMPONENT START -->
+                    <div class="form-group">
+                        <div class="text-center" name="Downgrade">
+                            <button type="submit" class="btn btn-danger text-center">Cancel Subscription</button>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- COMPONENT END -->
+                </form>
+                <% } else {%>
+                <form action="/charge/<%=currentUser.username %>" method="POST">
+                    <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                        data-key="pk_test_zmpaHB8D8mG8P56fS2QUdisz" data-amount="499"
+                        data-name="Welcome to your payment" data-description="You should pay monthly fee"
+                        data-image="https://stripe.com/img/documentation/checkout/marketplace.png" data-locale="auto"
+                        data-zip-code="true">
+                    </script>
+                    <script>
+                        //Hide default stripe button
+                        document.getElementsByClassName('stripe-button-el')[0]
+                            .style.display = 'none';
+                    </script>
+                    <button type="submit" class="btn btn-primary btn-outline-dark text-white btn-lg ">
+                        Pay $4.99/month
+                    </button>
+                </form>
+            </div>
+            <% }%>
+            <% }%>
+        </div>
+
+    </header>
+
+    <!-- <div class="row text-center landing-header" style="display:flex; flex-wrap: wrap;">
+        
+            <% if(campgrounds !== null  ) { %>
+                <% campgrounds.forEach(function(campground){ %>
+                    <div class="col-md-3 col-sm-6 "name = "display">
+                        <div class="thumbnail">
+                                
+                        <div class="caption">
+                            <h3> <%= campground.search %> </h3>
+                            <h3>=</h3>
+                            <h3><%= campground.courtName %>  Court</h3>
+                            <h4><%= campground.address %></h4>
+                            <h4><%= campground.phone %></h4>
+                               
+                        </div>
+                        </div>
+                    </div>
+                    
+                <% }); %>
+        <% } %>
+      
+    </div> -->
+</div>
+<!-- <ul class="slideshow">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+</ul> -->
+<script>
+    //document.getElementById("inputData").value = sessionStorage.getItem("comment");
+
+    function saveComment() {
+        var comment = document.getElementById("inputData").value;
+        if (comment == "") {
+            //alert("Please enter a comment in first!");
+            return false;
+        }
+
+        sessionStorage.setItem("comment", comment);
+        //alert("Your comment has been saved!");
+
+        location.reload();
+        return false;
+        //return true;
+    }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+<% if(currentUser){ %>
+<script>
+    var socket = io();
+    socket.emit('login', {
+        userId: '<%= currentUser.username %>'
+    });
+</script>
+<% }%>
+<% include ../partials/footer %>

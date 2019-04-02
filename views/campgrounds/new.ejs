@@ -1,0 +1,37 @@
+<% include ../partials/header %>
+<div class="container">
+    <div class="row">
+        <h1 style="text-align: center">Add a new Court</h1>
+        <div style="width: 30%; margin: 25px auto;">
+            <form action="/campgrounds" method="POST">
+                
+                <div class="form-group">
+                    <input class="form-control" type="text" name="judicalDistrictNum" placeholder="Judical District Number">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="text" name="courtName" placeholder="Court Name">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="text" name="address" placeholder="Court Address">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="text" name="phone" placeholder="Phone: 000-000-000">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="text" name="zipcodes" placeholder="Zipcodes">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block" onclick="myAddFunction()">Submit!</button>
+                </div>
+            </form>
+            <script>
+            function myAddFunction(){
+                window.alert("New Court Data Added to the database!")
+            }
+            </script>
+            <a href="/campgrounds">Go Back</a>
+        </div>
+    </div>
+</div>
+<% include ../partials/footer %>
+
