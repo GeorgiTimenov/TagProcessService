@@ -45,7 +45,7 @@ User.findOneAndRemove({ username: 'DaveRolf2019' }, function(err) {
 
 });
 
-const newuser = new Admin();
+/* const newuser = new Admin();
    newuser.firstname = "Dave";
    newuser.lastname = "Rolf";
    newuser.companyname="TagProcess Service";
@@ -54,13 +54,13 @@ const newuser = new Admin();
    newuser.username = "DaveRolf2019"
    newuser.password = newuser.encryptPassword("123qweasdzxc");
   // Create a new campground and save to DB
-  
+
   Admin.create(newuser, function(err, newlyCreated){
     if(err){
       console.log(err);
     } else {      
     }
-});
+}); */
 
 //socket 
 var users ={}
@@ -373,10 +373,11 @@ app.get('/charge',(req,res)=>{
 app.get('/downgrade/',(req,res)=>{
   res.redirect("/login")
 })
-app.set('port', (process.env.PORT || 5000))
+app.set('port', (process.env.PORT || 5000));
+
 http.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'))
-})
+});
 
 
 function escapeRegex(text) {
