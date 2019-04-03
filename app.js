@@ -373,7 +373,7 @@ app.get('/charge',(req,res)=>{
 app.get('/downgrade/',(req,res)=>{
   res.redirect("/login")
 })
-app.set('port', (process.env.PORT || 5000));
+app.set('port', (process.env.PORT || 3000));
 
 http.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'))
