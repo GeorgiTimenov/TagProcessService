@@ -23,7 +23,7 @@
 
   <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
-    <a class="navbar-brand mr-1" href="index.html">Admin Panel</a>
+    <a class="navbar-brand mr-1" href="#">Admin Panel</a>
 
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
       <i class="fas fa-bars"></i>
@@ -203,10 +203,31 @@
           </button>
         </div>
         <div class="modal-body">
-
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1">Username</span>
+                </div>
+                <input type="text" class="form-control" placeholder="<%= admin.username %>" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1">Firstname</span>
+                </div>
+                <input type="text" class="form-control" placeholder="<%= admin.firstname %>" aria-label="Username" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Lastname</span>
+                  </div>
+                  <input type="text" class="form-control" placeholder="<%= admin.lastname %>" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1">Telephone</span>
+                </div>
+                <input type="text" class="form-control" placeholder="<%= admin.phonenumber %>" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+          <button class="btn btn-secondary" type="submit" data-dismiss="modal">Cancel</button>
           <a class="btn btn-primary" href="/">Change</a>
         </div>
       </div>

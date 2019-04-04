@@ -1,17 +1,15 @@
 <% include ../partials/header %>
 
-<div class="container">
-    <header class="jumbotron landing-header">
-        <div class="container">
-            <div style="text-align:center">
+
+            <!-- <div style="text-align:center">
                 <h2>Welcome To <strong>Tag Process Service - Court Locator</strong></h2>
-            </div>
-            <p>
-
-                <!--  <a class="btn btn-primary btn-large" href="/campgrounds/new">Add New Courts</a> -->
-
-            </p>
-
+            </div> -->
+            
+            
+            <% if(currentUser){ %>
+                <div class="container">
+                        <header class="jumbotron landing-header">
+                            <div class="container">
             <p>
                 <form action="/campgrounds" method="GET" class="landing-header form-inline">
                     <div class="form-group">
@@ -61,13 +59,14 @@
                     </div>
                 </form>
             </p>
+            <% } %>
             <% if(noMatch !== null) { %>
             <h3 style="text-align: center"><%= noMatch %></h3>
             <% } %>
             <% if(currentUser){ %>
-            
+
             <div class="col-md-12 text-center">
-                    <% if(currentUser.subscription){ %>
+                <% if(currentUser.subscription){ %>
                 <h3>Upload your csv file</h3>
                 <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data">
                     <!-- COMPONENT START -->
@@ -94,7 +93,7 @@
                     </div>
                     <!-- COMPONENT END -->
                 </form>
-                <form ref='Cancel' id='cancel' action='/downgrade/<%=currentUser.username %>' method='POST' >
+                <form ref='Cancel' id='cancel' action='/downgrade/<%=currentUser.username %>' method='POST'>
                     <!-- COMPONENT START -->
                     <div class="form-group">
                         <div class="text-center" name="Downgrade">
@@ -104,7 +103,7 @@
                     </div>
                     <!-- COMPONENT END -->
                 </form>
-                <form ref='historyview' id='historyview' action='/history/<%=currentUser.username %>' method='POST' >
+                <form ref='historyview' id='historyview' action='/history/<%=currentUser.username %>' method='POST'>
                     <!-- COMPONENT START -->
                     <div class="form-group">
                         <div class="text-center" name="viewhistory">
@@ -131,47 +130,53 @@
                         Pay $4.99/month
                     </button>
                 </form>
-           
-            <% }%>
-            <% }%>
-            
-    
-    
-                    <%if(allhistory !== null){%>
-                    <div class="col-md-12" style="height:480px;overflow:auto;background-color: #ffffff;" class="table-responsive">
 
-                        <table style="background-color: #ffffff;">
-                    <% allhistory.forEach(function(campground,index){ %>
-                    <tr>
-                        <th></th>
-                        <th>Input</th>
-                        <th>Output</th>
-                    </tr>
-                    <tr><td></td>
-                        <td><%= campground.search%></td>
-                        <td><%= campground.courtName%></td>
-                    </tr>
-                    <tr>
-                        <td><%= index+1 %></td>
-                        <td></td>
-                        <td><%= campground.address%></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td><%= campground.phone%></td>
-                    </tr>
-                    <tr></tr>
-                    <% }); %>
-                    <% } %>
-    
-                </table>
-    
+                <% }%>
+                <% }%>
+
+
+
+                <%if(allhistory !== null){%>
+                <div class="col-md-12" style="height:480px;overflow:auto;background-color: #ffffff;"
+                    class="table-responsive">
+
+                    <table style="background-color: #ffffff;">
+                        <% allhistory.forEach(function(campground,index){ %>
+                        <tr>
+                            <th></th>
+                            <th>Input</th>
+                            <th>Output</th>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><%= campground.search%></td>
+                            <td><%= campground.courtName%></td>
+                        </tr>
+                        <tr>
+                            <td><%= index+1 %></td>
+                            <td></td>
+                            <td><%= campground.address%></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td><%= campground.phone%></td>
+                        </tr>
+                        <tr></tr>
+                        <% }); %>
+                        <% } %>
+
+                    </table>
+
+                </div>
             </div>
-        </div>
-        </div>
-        
+        </div>       
     </header>
+
+    <% if(!currentUser){ %>
+
+        <img src="final01.png" style = "padding-left:25rem; padding-top:15rem;"/>
+        <% } %>  
 
     <!-- <div class="row text-center landing-header" style="display:flex; flex-wrap: wrap;">
         
