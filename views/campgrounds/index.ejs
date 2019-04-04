@@ -66,7 +66,7 @@
             <% } %>
             <% if(currentUser){ %>
             
-            <div class="col-md-10 text-center">
+            <div class="col-md-12 text-center">
                     <% if(currentUser.subscription){ %>
                 <h3>Upload your csv file</h3>
                 <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data">
@@ -104,6 +104,16 @@
                     </div>
                     <!-- COMPONENT END -->
                 </form>
+                <form ref='historyview' id='historyview' action='/history/<%=currentUser.username %>' method='POST' >
+                    <!-- COMPONENT START -->
+                    <div class="form-group">
+                        <div class="text-center" name="viewhistory">
+                            <button type="submit" class="btn btn-success text-center">Your Search History</button>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- COMPONENT END -->
+                </form>
                 <% } else {%>
                 <form action="/charge/<%=currentUser.username %>" method="POST">
                     <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
@@ -121,11 +131,46 @@
                         Pay $4.99/month
                     </button>
                 </form>
-            </div>
+           
             <% }%>
             <% }%>
-        </div>
+            
+    
+    
+                    <%if(allhistory !== null){%>
+                    <div class="col-md-12" style="height:480px;overflow:auto;background-color: #ffffff;" class="table-responsive">
 
+                        <table style="background-color: #ffffff;">
+                    <% allhistory.forEach(function(campground,index){ %>
+                    <tr>
+                        <th></th>
+                        <th>Input</th>
+                        <th>Output</th>
+                    </tr>
+                    <tr><td></td>
+                        <td><%= campground.search%></td>
+                        <td><%= campground.courtName%></td>
+                    </tr>
+                    <tr>
+                        <td><%= index+1 %></td>
+                        <td></td>
+                        <td><%= campground.address%></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td><%= campground.phone%></td>
+                    </tr>
+                    <tr></tr>
+                    <% }); %>
+                    <% } %>
+    
+                </table>
+    
+            </div>
+        </div>
+        </div>
+        
     </header>
 
     <!-- <div class="row text-center landing-header" style="display:flex; flex-wrap: wrap;">

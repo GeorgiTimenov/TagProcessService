@@ -24,6 +24,7 @@ var UserSchema = new mongoose.Schema({
     password: String,
     customerid:String,
     subscription:Boolean
+    
 
 });
 

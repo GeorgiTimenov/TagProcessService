@@ -5,6 +5,8 @@ var middleware = require("../middleware");
 var csrf = require('csurf');
 var passport = require('passport');
 var csrfProtection = csrf();
+var User = require("../models/user");
+var Comment = require("../models/comment");
 router.use(csrfProtection);
     const forceSync = require('sync-rpc');
     const syncFunction = forceSync(require.resolve('./searchmaricopa'));
@@ -15,13 +17,11 @@ router.use(csrfProtection);
 router.get("/", function(req, res){
     var searchData =[];
     var noMatch = null;
-    
+    //console.log(req);
     if(req.query.search ) {
         var result;
         var searchquery=[];
         var searchzip =[]
-       var maricopa = {};
-       var paramadrress =[];
         result = req.query.search.trim().split("\n");
         //console.log(typeof(req.query.search));
         //console.log("result "+result.length);
@@ -70,6 +70,8 @@ router.get("/", function(req, res){
                                 temp.address = allCampgrounds[j].address;
                                 temp.phone = allCampgrounds[j].phone;
                                 searchData.push(temp); break;
+                               
+                                
                             } else {
                                 if (j == allCampgrounds.length - 1) {
                                 temp.num = i + 1;
@@ -84,7 +86,37 @@ router.get("/", function(req, res){
                     //console.log("Search Data =>"+searchData);
                     
                 } 
-                res.render("campgrounds/index",{campgrounds:searchData,noMatch: null});  
+                res.render("campgrounds/index",{campgrounds:searchData,noMatch: null,allhistory:null});
+                if(req.user) {
+                    User.findOne({username:req.user.username}, function(err, user){
+                        if(err){
+                            console.log(err);
+                            res.redirect("/campgrounds");
+                        } else {
+                            searchData.forEach((data,index) => {
+                                Comment.create(data, function(err, comment){
+                                    if(err){
+                                        
+                                        console.log(err);
+                                    } else {
+                                        //add username and id to comment
+                                       
+                                        comment.username = req.user.username;
+                                        comment.search = data.search;
+                                        comment.courtName = data.courtName;
+                                        comment.address = data.address;
+                                        comment.phone = data.phone;
+                                        //save comment
+                                        comment.save();
+                                        console.log(comment);
+                                        console.log("=>"+index);
+                                    }
+                                 });
+                            });
+                        }
+                    });
+               
+            }
             }
                         
         });
@@ -98,14 +130,17 @@ router.get("/", function(req, res){
            if(err){
                console.log(err);
            } else {
-              res.render("campgrounds/index",{campgrounds:null, noMatch: noMatch});
+              res.render("campgrounds/index",{campgrounds:null, noMatch: noMatch,allhistory:null});
            }
         });
     }
 });
+router.get("/",function(req,res){
+    res.render("campgrounds/index",{campgrounds:null,noMatch: null});
 
+})
 //CREATE - add new campground to DB
-router.post("/", middleware.isLoggedIn, function(req, res){
+/* router.post("/", middleware.isLoggedIn, function(req, res){
     // get data from form and add to campgrounds array
    
    
@@ -126,7 +161,7 @@ router.post("/", middleware.isLoggedIn, function(req, res){
             res.redirect("/campgrounds");
         }
     });
-});
+}); */
 
 //NEW - show form to create new campground
 router.get("/new", middleware.isLoggedIn, function(req, res){

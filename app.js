@@ -42,7 +42,7 @@ app.use(flash());
 // seedDB(); //seed the database
 //Initial user
 User.findOneAndRemove({ username: 'DaveRolf2019' }, function(err) {
-
+  console.log(err);
 });
 
 /* const newuser = new Admin();
@@ -116,7 +116,10 @@ app.use("/campgrounds/:id/comments", commentRoutes);
    
 }); */
 
-// default options
+// default options;
+app.get('/',function(req,res){
+  console.log("ok");
+})
 app.use(fileUpload());
 app.post('/upload', function(req, res) {
   let sampleFile;
@@ -249,7 +252,6 @@ a,b,c
         searchData.forEach((d) => {
           const row = []; // a new array for each row of data
           
-        
           row.push(d.search);
           row.push(d.districtNum);
           row.push(d.courtName);
@@ -259,11 +261,39 @@ a,b,c
           //console.log("row =>" +row); // by default, join() uses a ','
           fs.writeFileSync(outputPath, output.join(os.EOL)); 
         });
-        //console.log("outputpath=>"+outputPath);
-        
-         noMatch = "Upload completed"
-        res.render("campgrounds/index",{campgrounds:null,noMatch:noMatch  }) 
-        
+        console.log("outputpath=>"+output);
+        noMatch = "Upload completed";
+        req.flash("success", "Upload Completed! You can download now");
+        res.render("campgrounds/index",{campgrounds:null,noMatch:noMatch,allhistory:null  }) 
+        if(req.user) {
+          User.findOne({username:req.user.username}, function(err, user){
+              if(err){
+                  console.log(err);
+                  res.redirect("/campgrounds");
+              } else {
+                  searchData.forEach((data,index) => {
+                      Comment.create(data, function(err, comment){
+                          if(err){
+                              
+                              console.log(err);
+                          } else {
+                              //add username and id to comment
+                             
+                              comment.username = req.user.username;
+                              comment.search = data.search;
+                              comment.courtName = data.courtName;
+                              comment.address = data.address;
+                              comment.phone = data.phone;
+                              //save comment
+                              comment.save();
+                              
+                          }
+                       });
+                  });
+              }
+          });
+     
+  }
        
     });   
       //console.log("regex => "+ regex)
@@ -373,6 +403,19 @@ app.get('/charge',(req,res)=>{
 app.get('/downgrade/',(req,res)=>{
   res.redirect("/login")
 })
+app.get('/history/',(req,res)=>{
+  res.redirect("/login")
+});
+app.post('/history/:id',(req,res) =>{
+  Comment.find({username:req.params.id}, function(err, allhistory){
+    if(err){
+      console.log(err);
+    }
+    res.render("campgrounds/index",{campgrounds:null,noMatch: null,allhistory:allhistory});
+  })
+  //.then(subscription => res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." }));
+
+});
 app.set('port', (process.env.PORT || 5000));
 
 http.listen(app.get('port'), function() {
