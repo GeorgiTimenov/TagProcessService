@@ -403,7 +403,6 @@ app.get('/charge',(req,res)=>{
 app.get('/downgrade/',(req,res)=>{
   res.redirect("/login")
 })
-<<<<<<< HEAD
 app.get('/history/',(req,res)=>{
   res.redirect("/login")
 });
@@ -418,9 +417,6 @@ app.post('/history/:id',(req,res) =>{
 
 });
 app.set('port', (process.env.PORT || 5000));
-=======
-app.set('port', (process.env.PORT || 3000));
->>>>>>> 3cb201b8db8e3b8fe3c976003b543e640187a1b3
 
 http.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'))
