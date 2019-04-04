@@ -118,7 +118,7 @@ app.use("/campgrounds/:id/comments", commentRoutes);
 
 // default options;
 app.get('/',function(req,res){
-  
+
   console.log("ok");
 })
 app.use(fileUpload());
