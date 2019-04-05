@@ -136,7 +136,7 @@ router.get("/", function(req, res){
     }
 });
 router.get("/",function(req,res){
-    res.render("campgrounds/index",{campgrounds:null,noMatch: null});
+    res.render("campgrounds/index",{campgrounds:null,noMatch: null,allhistory:null});
 
 })
 //CREATE - add new campground to DB

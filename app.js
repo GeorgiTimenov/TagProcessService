@@ -117,9 +117,9 @@ app.use("/campgrounds/:id/comments", commentRoutes);
 }); */
 
 // default options;
-app.get('/',function(req,res){
+app.get("/",function(req,res){
+  res.render("campgrounds/index",{campgrounds:null,noMatch: null,allhistory:null});
 
-  console.log("ok");
 })
 app.use(fileUpload());
 app.post('/upload', function(req, res) {
@@ -372,8 +372,8 @@ app.post('/charge/:id',(req,res) =>{
   //.then(subscription => res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." }));
 
 });
-app.post('/downgrade/:id',(req,res) =>{
-  User.findOne({ username: req.params.id }, function (err, adventure) {
+app.post('/downgrade',(req,res) =>{
+  User.findOne({ username: req.user.username }, function (err, adventure) {
     stripe.subscriptions.del({
       customer :adventure.customerid,
       items :[{
@@ -404,11 +404,10 @@ app.get('/charge',(req,res)=>{
 app.get('/downgrade/',(req,res)=>{
   res.redirect("/login")
 })
-app.get('/history/',(req,res)=>{
-  res.redirect("/login")
-});
-app.post('/history/:id',(req,res) =>{
-  Comment.find({username:req.params.id}, function(err, allhistory){
+
+app.get('/history',(req,res) =>{
+  console.log(req);
+  Comment.find({username:req.user.username}, function(err, allhistory){
     if(err){
       console.log(err);
     }

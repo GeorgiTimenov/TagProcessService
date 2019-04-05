@@ -16,7 +16,8 @@ passport.deserializeUser(function (id, done) {
 }); */
 //root route
 router.get("/", function(req, res){
-    res.redirect("/campgrounds");
+  res.render("campgrounds/index",{campgrounds:null,noMatch: null,allhistory:null});
+
 });
 
 // show register form
@@ -54,7 +55,7 @@ router.post("/register", function(req, res){
         //redirect back to campgrounds page
        
         req.flash("success", "Welcome!  You SignedUp! Please Login");
-        res.redirect("/campgrounds",);
+        res.redirect("/",);
     }
 });
 });
@@ -132,7 +133,7 @@ catch(error) {
 router.get("/logout", function(req, res){
    req.logout();
    req.flash("success", "Logged you out!");
-   res.redirect("/campgrounds");
+   res.redirect("/");
 });
 
 

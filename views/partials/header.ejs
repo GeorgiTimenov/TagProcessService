@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
         <head>
-                <title>Colorado Courts</title>
+                <title>Court Locator</title>
                 <link rel="icon" href="colorado_courts_logo1.ico" type="image/x-icon">
                 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -18,11 +18,11 @@
                 <a  href="/"><img src="final02.png"  alt="Tag Process Service, Inc." id="logo" width="160px" height="38px" style ="margin-top: 0.8rem;margin-bottom: 0.8rem"></a>    
             </div>
             <div class="collapse navbar-collapse">
-                <ul class="nav navbar-nav navbar-right" style = "padding :0.1rem; ">
+                <ul class="nav navbar-nav navbar-right" style = "padding :1rem; ">
                     <% if(!currentUser){ %>
-                        <li><a href="/admin"  style ="color:black;"><i class="fa fa-unlock fa-2"></i>&nbsp;Admin</a></li>
-                        <li><a href="/login" style ="color:black;"><i class="fa fa-fw fa-user"></i>Login</a></li>
-                        <li><a href="/register" style ="color:black;"><i class="fa fa-fw fa-user"></i>Sign Up</a></li>
+                       <!--  <li><a href="/admin"  style ="color:black;"><i class="fa fa-unlock fa-2"></i>&nbsp;Admin</a></li> -->
+                        <a href="/login" style ="color:black;"><img src="login.png"/> &nbsp;LOGIN</a>
+                        <!-- <li><a href="/register" style ="color:black;"><i class="fa fa-fw fa-user"></i>Sign Up</a></li> -->
                     <% } else { %>
                         
                         <li><a href="" style ="color:black;">Signed In As <%= currentUser.username %></a></li>
