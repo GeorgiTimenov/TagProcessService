@@ -30,8 +30,18 @@
     </button>
 
     <!-- Navbar Search -->
-    <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0">
-      
+    <form class="d-none d-md-inline-block form-inline ml-auto mr-auto mr-md-auto my-2 my-md-0">
+        <div class= "navbar-item text-center" > <h3 class ="title is-3" style = "color: white"   id="datetime"></h3></div>
+
+        <script>
+            var myTimer = setInterval(myClock, 1000);
+            function myClock(){
+                var dt = new Date();
+                document.getElementById("datetime").innerHTML = dt.toDateString()  + '   ' + dt.toLocaleTimeString();
+
+    //   document.getElementById("datetime").innerHTML = dt.toLocaleString();
+            }
+        </script>
     </form>
 
     <!-- Navbar -->
@@ -119,7 +129,7 @@
                     <th>Username</th>
                     <th>Company name</th>
                     <th>Email</th>
-                    <th>Subscription</th>
+                    <th>SubscriptionDate</th>
                     <th>Online Status</th>
                   </tr>
                 </thead>
@@ -131,10 +141,13 @@
                       <td><%= user.username %></td>
                       <td><%= user.companyname %></td>
                       <td><%= user.email %></td>
-                      <td style="text-align:center"> <%if(user.subscription){%>
-                        <strong>Yes</strong>
-                        <% } else { %> <strong>No</strong>
-                          <% } %>
+                      <td class="text-center"><%if(user.subscriptionDate){%>
+                        <strong>
+                         <%= user.subscriptionDate %>
+                        </strong>
+                        <% } else { %> 
+                          <strong>Not yet</strong>
+                          <% } %></td>
                       <td id ='<%= user.username %>'  style="text-align:center"><img src='offline.png' /></td>
                       </tr>
                 <% }); %>
@@ -146,7 +159,7 @@
                     <th>Username</th>
                     <th>Company name</th>
                     <th>Email</th>
-                    <th>Subscription</th>
+                    <th>SubscriptionDate</th>
                     <th>Online Status</th>
                   </tr>
                 </tfoot>

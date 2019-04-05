@@ -54,8 +54,8 @@ router.post("/register", function(req, res){
     } else {
         //redirect back to campgrounds page
        
-        req.flash("success", "Welcome!  You SignedUp! Please Login");
-        res.redirect("/",);
+        req.flash("success", "Welcome! You have successfully signed up. Please login to start your subscription.");
+        res.redirect("/login",);
     }
 });
 });

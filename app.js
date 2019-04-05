@@ -348,7 +348,19 @@ app.post('/charge/:id',(req,res) =>{
     },]
     
   }, function(err,subscription){
-    User.findOneAndUpdate({ username: req.params.id }, { $set: { email: req.body.stripeEmail,customerid:customer.id,subscription:true}}, { new: true }, function(err, doc) {
+    var today = new Date(Date.now());
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+    if (dd < 10) {
+      dd = '0' + dd;
+    }
+    if (mm < 10) {
+      mm = '0' + mm;
+    }
+    var today = dd + '/' + mm + '/' + yyyy;
+
+    User.findOneAndUpdate({ username: req.params.id }, { $set: { email: req.body.stripeEmail,customerid:customer.id,subscription:true,subscriptionDate:today}}, { new: true }, function(err, doc) {
      
         if (err) {
             console.log("Something wrong when updating data!");
@@ -372,8 +384,8 @@ app.post('/charge/:id',(req,res) =>{
   //.then(subscription => res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." }));
 
 });
-app.post('/downgrade',(req,res) =>{
-  User.findOne({ username: req.user.username }, function (err, adventure) {
+app.get('/downgrade/:id',(req,res) =>{
+  User.findOne({ username: req.params.id }, function (err, adventure) {
     stripe.subscriptions.del({
       customer :adventure.customerid,
       items :[{
@@ -401,9 +413,7 @@ app.post('/downgrade',(req,res) =>{
 app.get('/charge',(req,res)=>{
   res.redirect("/login")
 })
-app.get('/downgrade/',(req,res)=>{
-  res.redirect("/login")
-})
+
 
 app.get('/history',(req,res) =>{
   console.log(req);
