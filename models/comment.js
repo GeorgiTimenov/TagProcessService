@@ -5,7 +5,8 @@ var commentSchema = mongoose.Schema({
     courtName: String,
     address : String,
     phone :String,
-    username: String
+    username: String,
+    filingFee:String
 });
 
 module.exports = mongoose.model("Comment", commentSchema);

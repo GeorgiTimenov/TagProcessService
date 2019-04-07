@@ -6,7 +6,8 @@ var campgroundSchema = new mongoose.Schema({
    courtName: String,
    address: String,
    phone: String,
-   zipcodes: String
+   zipcodes: String,
+   filingFee:String
    
 });
 

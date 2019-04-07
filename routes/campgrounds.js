@@ -28,7 +28,7 @@ router.get("/", function(req, res){
         for(var i = 0; i< result.length;i++ ) { 
             searchquery[i] = result[i].slice(result[i].length-6,result[i].length).trim();
             searchzip[i]= parseInt(searchquery[i]);
-            if (searchzip[i] > 80000 && searchzip[i] < 81659) {
+            if ((searchzip[i] > 80000 && searchzip[i] < 81659) || (searchzip[i] > 80000 && searchzip[i])) {
                 regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
             } 
             else if (searchzip[i] >= 0 && searchzip[i] < 99950 ) {     
@@ -69,6 +69,7 @@ router.get("/", function(req, res){
                                 temp.courtName = allCampgrounds[j].courtName + " Court";
                                 temp.address = allCampgrounds[j].address;
                                 temp.phone = allCampgrounds[j].phone;
+                                temp.filingFee = allCampgrounds[j].filingFee;
                                 searchData.push(temp); break;
                                
                                 
@@ -106,10 +107,11 @@ router.get("/", function(req, res){
                                         comment.courtName = data.courtName;
                                         comment.address = data.address;
                                         comment.phone = data.phone;
+                                        comment.filingFee = data.filingFee;
                                         //save comment
                                         comment.save();
                                         console.log(comment);
-                                        console.log("=>"+index);
+                                        
                                     }
                                  });
                             });

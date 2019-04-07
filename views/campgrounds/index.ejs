@@ -11,53 +11,64 @@
     <header class="">
         <% if(currentUser){ %>
             <% if(currentUser.subscription){ %>
-        <form action="/campgrounds" method="GET" encType="multipart/form-data">
-            <div class="form-group">
-                <div class="row">
 
-                    <input type="text" name="search" placeholder="Enter your address..." class="form-control">
-
-                </div>
-                <div class="row text-center" style="padding-top: 2rem;">
-                    <input type="submit" value="Search" class="btn btn-success text-center">
-                </div>
-                <div class="row">
-                    <%if(campgrounds !== null){%>
-                    <div class="col-sm-12 col-md-12" style="height:120px;overflow:auto;" class="table-responsive">
-
-                        <table style="background-color: #ffffff;">
-
-
-
-                            <% campgrounds.forEach(function(campground){ %>
-                            <tr>
-                                <th>Input</th>
-                                <th>Output</th>
-                            </tr>
-                            <tr>
-                                <td><%= campground.search%></td>
-                                <td><%= campground.courtName%></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td><%= campground.address%></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td><%= campground.phone%></td>
-                            </tr>
-                            <tr></tr>
-                            <% }); %>
-
-
-                        </table>
-
+        <form action="/campgrounds" method="GET" encType="multipart/form-data" class = "text-center">
+            <h2>Single Search</h2>
+                <div class="row ">
+                    <div class="form-group col-sm-11">
+                            <input type="text" name="search" placeholder="Enter your address..." class="form-control" required>
                     </div>
-                    <% } %>
+                    <div class="form-group  col-sm-1">
+                    <input type="submit" value="Search" class="btn btn-primary " >
+                    </div>
+                    
                 </div>
-            </div>
+               
+                
            
         </form>
+        <div class="  text-center">
+                <%if(campgrounds !== null){%>
+                <div class="col-sm-12 col-md-12" style="height:120px;overflow:auto;" class="table-responsive">
+
+                    <table style="background-color: #ffffff;text-align:center;padding-left:10rem">
+
+
+
+                        <% campgrounds.forEach(function(campground){ %>
+                        <tr>
+                            <th>Input</th>
+                            <th style="padding-left:3rem">Output</th>
+                            <th style="padding-left:3rem"></th>
+                        </tr>
+                        <tr>
+                            <td style="padding-left:3rem"><%= campground.search%></td>
+                            <td style="padding-left:3rem"><%= campground.courtName%> </td>
+                            <td style="padding-left:3rem">Filing Fee</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-left:3rem"></td>
+                            <td style="padding-left:3rem"><%= campground.address%></td>
+                            <td style="padding-left:3rem"class="text-center"><%= campground.filingFee %></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-left:3rem"></td>
+                            <td style="padding-left:3rem"><%= campground.phone%></td>
+                            <td style="padding-left:3rem"></td>
+                        </tr>
+                        <!-- <tr>
+                                <td></td>
+                                <td>Filing Fee: <%= campground.filingFee%></td>
+                            </tr> -->
+                        <tr></tr>
+                        <% }); %>
+
+
+                    </table>
+
+                </div>
+                <% } %>
+            </div>
         <% } else { %>
         <div class="text-center" style = "margin-top:24rem;">
                 <h2 class=>Step 2 of 2</h2>
@@ -67,17 +78,18 @@
                 <% }%>      
         <% } %> 
        
-        <% if(noMatch !== null) { %>
+       <!--  <% if(noMatch !== null) { %>
         <h3 style="text-align: center"><%= noMatch %></h3>
-        <% } %>
+        <% } %> -->
         <% if(currentUser){ %>
 
-        <div class="col-md-12 text-center">
+        <div class="col-md-12 text-center" style="padding-top:10rem;">
             <% if(currentUser.subscription){ %>
-            <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data">
+                <h2>Batch Search</h2>
+            <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data" class="form-inline text-center">
                 <!-- COMPONENT START -->
-                <div class="form-group">
-                    <div class="input-group input-file" name="Fichier1">
+                
+                    <div class="input-group input-file " name="Fichier1">
                         <span class="input-group-btn">
                             <input type="file" class="btn btn-default" name="sampleFile">Choose</input>
                         </span>
@@ -85,15 +97,14 @@
                             <button type="submit" class="btn btn-primary">Upload address File</button>
                         </span>
                     </div>
-                </div>
                 <!-- COMPONENT END -->
             </form>
-            <form ref='uploadForm' id='uploadForm' action='/download' method='POST' encType="multipart/form-data">
+            <form ref='uploadForm' id='uploadForm' action='/download' method='POST' encType="multipart/form-data" style = "padding-top: 3rem">
                 <!-- COMPONENT START -->
                 <div class="form-group">
                     <div class="text-center" name="Fichier1">
 
-                        <button type="submit" class="btn btn-success text-center">Download Result File</button>
+                        <button type="submit" class="btn btn-primary text-center">Download Result File</button>
                         </span>
                     </div>
                 </div>
@@ -104,22 +115,22 @@
                 <!-- COMPONENT START -->
                 <div class="form-group">
                     <div class="text-center" name="viewhistory">
-                        <button type="submit" class="btn btn-success text-center">Your Search History</button>
+                        <button type="submit" class="btn btn-primary text-center">Your Search History</button>
                         </span>
                     </div>
                 </div>
                 <!-- COMPONENT END -->
             </form>
-            <form action='/downgrade/<%= currentUser.username %>' method='GET' encType="multipart/form-data">
-                <!-- COMPONENT START -->
+          <!--   <form action='/downgrade/<%= currentUser.username %>' method='GET' encType="multipart/form-data">
+               
                 <div class="form-group">
                     <div class="text-center" name="viewhistory">
                         <button type="submit" class="btn btn-success text-center">Cancel subscription</button>
                         </span>
                     </div>
                 </div>
-                <!-- COMPONENT END -->
-            </form>
+                COMPONENT END
+            </form>  -->
             <% } else {%>
             <form action='/charge/<%= currentUser.username %>' method="POST" style="margin-top:10rem;">
                 <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
@@ -169,12 +180,16 @@
                         <td></td>
                         <td><%= campground.phone%></td>
                     </tr>
+                    <tr>    <td></td>
+                            <td></td>
+                            <td>Filing Fee: <%= campground.filingFee %></td>
+                        </tr>
                     <tr></tr>
                     <% }); %>
                     <% } %>
 
                 </table>
-
+                
             </div>
         </div>
     </header>

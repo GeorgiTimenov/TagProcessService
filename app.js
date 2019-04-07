@@ -141,7 +141,7 @@ app.post('/upload', function(req, res) {
     //console.log("Date=>"+Date.now());
 
     uploadPath = __dirname + '/uploads/' + Date.now()+sampleFile.name;
-     console.log(" => "+uploadPath);
+     //console.log(" => "+uploadPath);
     sampleFile.mv(uploadPath, function(err) {
       if (err) {
         return res.status(500).send(err);
@@ -190,16 +190,21 @@ a,b,c
         searchquery[i] = result[i].slice(result[i].length-6,result[i].length-1).trim();
         searchzip[i]= parseInt(searchquery[i]);      
         
-        if (searchzip[i] > 80000 && searchzip[i] < 81659) {
+        if (searchzip[i] > 80000 && searchzip[i] < 81659 && searchzip[i] >88900 && searchzip[i] < 89836) {
           regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
-      }  else {     
-        //regex[i] = 
-       const syncReturn = syncFunction(result[i]);
+      }  else if (searchzip[i] >= 85001 && searchzip[i] <= 85385 ) {     
+        /* maricopa.num = i; maricopa.address = result[i];
+        paramadrress.push(maricopa); */
+       //const syncReturn = syncFunction(result[i]);
         regex[i] =new RegExp(escapeRegex(syncReturn), 'gi');;
         //console.log("sycnReturn =>"+ syncReturn);
-       // console.log("regex =>"+i+"=>" +regex[i]);
+        //console.log("regex =>"+i+"=>" +regex[i]);
         searchquery[i] = syncReturn;
                    
+    }
+    else{
+        regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi'); 
+        //console.log( regex[i]);
     }
       }
       Campground.find({zipcodes: regex}, function(err, allCampgrounds){
@@ -226,6 +231,7 @@ a,b,c
                             temp.courtName = allCampgrounds[j].courtName + " Court";
                             temp.address = allCampgrounds[j].address;
                             temp.phone = allCampgrounds[j].phone;
+                            temp.filingFee = allCampgrounds[j].filingFee;
                             searchData.push(temp); break;
                         } else {
                             if (j == allCampgrounds.length - 1) {
@@ -236,6 +242,7 @@ a,b,c
                             temp.courtName = null;
                             temp.address = "";
                             temp.phone = null;
+                            temp.filingFee = null;
                             searchData.push(temp);
                             }
                         }
@@ -248,7 +255,7 @@ a,b,c
             console.log("search => "+ JSON.stringify(searchData))
         }
         
-        var header =["Input Address","Distric Number", "Court Name","Court Address","Phone Number"];
+        var header =["Input Address","Distric Number", "Court Name","Court Address","Phone Number","Filing Fee"];
         output.push(header.join());
         searchData.forEach((d) => {
           const row = []; // a new array for each row of data
@@ -258,6 +265,7 @@ a,b,c
           row.push(d.courtName);
           row.push(`"${d.address}"`);
           row.push(d.phone);
+          row.push(d.filingFee);
           output.push(row.join());
           //console.log("row =>" +row); // by default, join() uses a ','
           fs.writeFileSync(outputPath, output.join(os.EOL)); 
@@ -285,6 +293,7 @@ a,b,c
                               comment.courtName = data.courtName;
                               comment.address = data.address;
                               comment.phone = data.phone;
+                              comment.filingFee = data.filingFee
                               //save comment
                               comment.save();
                               
@@ -314,7 +323,7 @@ a,b,c
  app.post('/download', function(req, res){
   if(outputPath !==undefined) {
   res.download(outputPath);
-} else{  res.render("campgrounds/index",{campgrounds:null,noMatch:"You didn't upload address file!" }) 
+} else{  res.render("campgrounds/index",{campgrounds:null,noMatch:"You didn't upload address file!" })
 }
 });
 /* stripe.products.create({
@@ -416,7 +425,7 @@ app.get('/charge',(req,res)=>{
 
 
 app.get('/history',(req,res) =>{
-  console.log(req);
+  //console.log(req);
   Comment.find({username:req.user.username}, function(err, allhistory){
     if(err){
       console.log(err);
