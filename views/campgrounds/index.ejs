@@ -11,29 +11,99 @@
     <header class="">
         <% if(currentUser){ %>
             <% if(currentUser.subscription){ %>
+        
+        <!-- <script type="text/javascript">
+            
+        function frontvalidation() {
+                var x, text;
 
-        <form action="/campgrounds" method="GET" encType="multipart/form-data" class = "text-center">
-            <h2>Single Search</h2>
+                // Get the value of the input field with id="numb"
+                x = document.getElementById("address").value;
+
+                // If x is Not a Number or less than one or greater than 10
+                if (x.length <=14 || x.length>= 150) {
+                    text =`Your court information could not be found. 
+1. Please verify your input address is a valid address. 
+2. The address might be located outside of our developed states. 
+Please refer to our home page for a current development map.
+                    ` ;
+                    alert(text);
+                } 
+               
+        }
+      
+        </script> -->
+         
+                
+                <h2 class="text-center">Single Search</h2>
                 <div class="row ">
                     <div class="form-group col-sm-11">
-                            <input type="text" name="search" placeholder="Enter your address..." class="form-control" required>
+                    <input type="text" id = "single" name="search" placeholder="Enter your address..." class="form-control" required>
                     </div>
                     <div class="form-group  col-sm-1">
-                    <input type="submit" value="Search" class="btn btn-primary " >
+                    <input  type="button" value="Search" class="btn btn-primary "  data-toggle="modal" data-target="#singlemodal"onclick= "singlesearch()"/>
                     </div>
                     
                 </div>
+       
+        <script>
                
+        function singlesearch() {
+            var inputaddress = document.getElementById("single").value;
+            console.log(inputaddress);
+            $.ajax({
+                url: `/getsearch/<%= currentUser.username %>`,
+                type:'POST',
+                data: { text: inputaddress },
                 
+            }).done(function(data)
+            {
+                console.log(data);
+                $("#singlechart").empty();
+            if(data =="error") {
+                var errormessagehead = `Your court information could not be found.` 
+                var errormessagebody1 = "1. Please verify your input address is a valid address.";
+                var errormessagebody2 = "2. The address might be located outside of our developed states.";
+                var errormessagebody3 = "Please refer to our home page for a current development map."
+                $("#singlechart").css("color","red");                                   
+                $("#singlechart").append(`<tr><th>${errormessagehead}</th></tr><tr><td>${errormessagebody1}</td></tr><tr><td>${errormessagebody2}</td></tr><tr><td>${errormessagebody3}</td></tr>`);
+            } else {
+                $("#singlechart").css("color","black");
+            $.each( data , function( index, eachdata ){
+            $("#singlechart").append(`<tr><th></th><th>Input</th><th>Output</th></tr><tr><td></td><td>${eachdata.search}</td><td>${eachdata.courtName}</td></tr><tr><td></td><td></td><td>${eachdata.address}</td></tr><tr><td></td><td></td><td>${eachdata.phone}</td></tr><tr><td></td><td></td><td>Filing Fee: ${eachdata.filingFee}</td></tr><tr></tr>`);
+            //$("#history").append(`${JSON.stringify(eachdata.search)}<br> ${index}`);
+            });
+            //$('#getResponse').html(`${JSON.stringify(data)}`);
+            }
+            })
+            .fail(function(jqXHR, textStatus, err) {
+            console.log('AJAX error response :', textStatus );
+        });
+        }
+
+            </script>
+            <div class="modal fade" id="singlemodal" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">Seach Result</h4>
+                        </div>
+                        <div class="modal-body">
+                            <table id = "singlechart" ></table>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
            
-        </form>
         <div class="  text-center">
                 <%if(campgrounds !== null){%>
                 <div class="col-sm-12 col-md-12" style="height:120px;overflow:auto;" class="table-responsive">
 
                     <table style="background-color: #ffffff;text-align:center;padding-left:10rem">
-
-
 
                         <% campgrounds.forEach(function(campground){ %>
                         <tr>
@@ -54,7 +124,7 @@
                         <tr>
                             <td style="padding-left:3rem"></td>
                             <td style="padding-left:3rem"><%= campground.phone%></td>
-                            <td style="padding-left:3rem"></td>
+                            <td style="padding-left:3rem"><%= campground.courtType%></td>
                         </tr>
                         <!-- <tr>
                                 <td></td>
@@ -78,29 +148,83 @@
                 <% }%>      
         <% } %> 
        
-       <!--  <% if(noMatch !== null) { %>
-        <h3 style="text-align: center"><%= noMatch %></h3>
-        <% } %> -->
+       
         <% if(currentUser){ %>
 
         <div class="col-md-12 text-center" style="padding-top:10rem;">
             <% if(currentUser.subscription){ %>
                 <h2>Batch Search</h2>
-            <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data" class="form-inline text-center">
+            <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data" class="form-inline">
                 <!-- COMPONENT START -->
-                
-                    <div class="input-group input-file " name="Fichier1">
+                <h3>Select the file format you will upload</h3>
+                <table class=" table table-responsive">
+                    <thead>
+                        <tr>
+                            <th style = "text-align: center"></th>
+                            <th style = "text-align: center">Account#<br>(Your file identifier)</th>
+                            <th style = "text-align: center">Address</th>
+                            <th style = "text-align: center">City</th>
+                            <th style = "text-align: center">State</th>
+                            <th style = "text-align: center">Zipcode</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    
+                        <tr>
+                            <td>
+                                <div class="radio">
+                                    <input type="radio" id='regular' name="address" >
+                                </div>
+                            </td>
+                            <td>
+                            777518
+                            </td>
+                            <td>1425 S Terry St</td>
+                            <td>Longmont</td>
+                            <td>CO</td>
+                            <td>80501</td>
+                        </tr>
+                        
+                            <tr>
+                                    <td>
+                                        
+                                    </td>
+                                    <td>
+                                   
+                                    </td>
+                                    <td>Entire address in one cell</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                            </tr>
+                            <tr>
+                                    <td>
+                                        <div class="radio">
+                                            <label><input type="radio" id='regular' name="address"></label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                    777518
+                                    </td>
+                                    <td>1425 S Terry St,Longmont,CO 80501</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                        </tbody>
+               </table>
+                    <div class="input-group input-file text-center " name="Fichier1">
                         <span class="input-group-btn">
                             <input type="file" class="btn btn-default" name="sampleFile">Choose</input>
                         </span>
                         <span class="input-group-btn">
-                            <button type="submit" class="btn btn-primary">Upload address File</button>
+                            <button type="submit" class="btn btn-primary">Download Result</button>
                         </span>
                     </div>
                 <!-- COMPONENT END -->
             </form>
-            <form ref='uploadForm' id='uploadForm' action='/download' method='POST' encType="multipart/form-data" style = "padding-top: 3rem">
-                <!-- COMPONENT START -->
+           <!--  <form ref='uploadForm' id='uploadForm' action='/download' method='POST' encType="multipart/form-data" style = "padding-top: 3rem">
+                < COMPONENT START
                 <div class="form-group">
                     <div class="text-center" name="Fichier1">
 
@@ -108,19 +232,39 @@
                         </span>
                     </div>
                 </div>
-                <!-- COMPONENT END -->
-            </form>
+                
+            </form> -->
 
-            <form action='/history' method='GET' encType="multipart/form-data">
+           <!--  <form action='/history/' method='GET' encType="multipart/form-data"> -->
                 <!-- COMPONENT START -->
-                <div class="form-group">
+                <div class="form-group" style = "padding-top: 5rem">
                     <div class="text-center" name="viewhistory">
-                        <button type="submit" class="btn btn-primary text-center">Your Search History</button>
+                        <button type="button" class="btn btn-primary text-center" data-toggle="modal" data-target="#myModal" onclick="get()"  >Your Search History</button>
+                        <div class="container">
+                                <!-- Modal -->
+                                <div class="modal fade" id="myModal" role="dialog">
+                                  <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Seach History</h4>
+                                      </div>
+                                      <div class="modal-body">
+                                            <table id ="history"></table>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                         </span>
                     </div>
                 </div>
+                
                 <!-- COMPONENT END -->
-            </form>
+        <!--     </form> -->
           <!--   <form action='/downgrade/<%= currentUser.username %>' method='GET' encType="multipart/form-data">
                
                 <div class="form-group">
@@ -144,7 +288,7 @@
                     document.getElementsByClassName('stripe-button-el')[0]
                         .style.display = 'none';
                 </script>
-                <button type="submit" class="btn btn-primary btn-outline-dark text-white btn-lg ">
+                <button type="submit" class="btn btn-primary btn-outline-dark text-white btn-lg" >
                         Subscribe $4.99/month
                 </button>
             </form>
@@ -158,7 +302,7 @@
             <div class="col-md-12" style="height:480px;overflow:auto;background-color: #ffffff;"
                 class="table-responsive">
 
-                <table style="background-color: #ffffff;">
+                <table  id="history"style="background-color: #ffffff;">
                     <% allhistory.forEach(function(campground,index){ %>
                     <tr>
                         <th></th>
@@ -244,24 +388,8 @@ data="https://www.youtube.com/v/tgbNymZ7vqY">
         <li></li>
         <li></li>
 </ul> -->
-<script>
-    //document.getElementById("inputData").value = sessionStorage.getItem("comment");
 
-    function saveComment() {
-        var comment = document.getElementById("inputData").value;
-        if (comment == "") {
-            //alert("Please enter a comment in first!");
-            return false;
-        }
 
-        sessionStorage.setItem("comment", comment);
-        //alert("Your comment has been saved!");
-
-        location.reload();
-        return false;
-        //return true;
-    }
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
 <% if(currentUser){ %>
 <script>
@@ -269,6 +397,34 @@ data="https://www.youtube.com/v/tgbNymZ7vqY">
     socket.emit('login', {
         userId: '<%= currentUser.username %>'
     });
+</script>
+
+<!-- <button class="btn-danger" id="getButton" onclick="get()">X</button> -->
+
+<script
+  src="https://code.jquery.com/jquery-1.12.4.js"
+  integrity="sha256-Qw82+bXyGq6MydymqBxNPYTaUXXq7c8v3CwiYwLLNXU="
+  crossorigin="anonymous"></script>
+<script>
+    function get() {
+        $.ajax({
+            type: 'GET',
+            url:'http://localhost:5000/ajaxcall/<%= currentUser.username %>',
+            dataType:'json'
+        })
+        .done(function(data) {
+            $("#history").empty();
+            console.log('Get Response: ', JSON.stringify(data,"",2));
+            $.each( data , function( index, eachdata ){
+            $("#history").append(`"<tr><th></th><th>Input</th><th>Output</th></tr><tr><td></td><td>${eachdata.search}</td><td>${eachdata.courtName}</td></tr><tr><td>${index + 1}</td><td></td><td>${eachdata.address}</td></tr><tr><td></td><td></td><td>${eachdata.phone}</td></tr><tr><td></td><td></td><td>Filing Fee: ${eachdata.filingFee}</td></tr><tr></tr>`);
+            //$("#history").append(`${JSON.stringify(eachdata.search)}<br> ${index}`);
+            });
+            //$('#getResponse').html(`${JSON.stringify(data)}`);
+        })
+        .fail(function(jqXHR, textStatus, err) {
+            console.log('AJAX error response :', textStatus );
+        });
+    }
 </script>
 <% }%>
 <% include ../partials/footer %>

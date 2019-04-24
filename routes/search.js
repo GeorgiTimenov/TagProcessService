@@ -1,12 +1,17 @@
 // async-thing.js file
+var GoogleMapsAPI = require('googlemaps');
 var geolib = require('geolib');
+var LocalStorage = require('node-localstorage').LocalStorage;
+localStorage = new LocalStorage('./scratch');
+var publicConfig = {
+key: 'AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI',
+/*  stagger_time:       1000, // for elevationPath
+encode_polylines:   false,
+secure:             true, // use https */
+};
+var gmAPI = new GoogleMapsAPI(publicConfig);
 
-  const searchmaricopa =  (latlng) => {
-    var area = [];
-    var result = [];
-    var areaname= ["Ironwood","White tank","Hassayampa","Desert Ridge","North Mesa","East Mesa","San Tan","San Marcos","Kyrene","Agua Fria"
-                      ,"South Mountain","Highland","West Mesa","McDowell Mountain","Arcadia Biltmore","University Lakes","Dreamy Draw","Downtown","Encanto","West McDowell",
-                      "Maryvale","Country Meadows","Moon Valley","Norht valley","Manistee","Arrowhead"] ;
+        var area = [];
         // Define the LatLng coordinates for the outer path.
    area[0] = [
         {lng:-112.205,	lat:	33.24},
@@ -1022,28 +1027,48 @@ area[25] =[
         {lng:-112.249,	lat:	33.840},
 ];
 
-    for (var i = 0; i < area.length; i++){
-  
-      result[i] = geolib.isPointInside(
-          latlng,
+let search = function(address){
+  return new Promise(function(resolve, reject) {
+    var geocodeParams = {
+      "address":  address,
+  "language":   "en",
+      "region":     "us"
+  };
+  var temp;
+  var areaname= ["Ironwood","White tank","Hassayampa","Desert Ridge","North Mesa","East Mesa","San Tan","San Marcos","Kyrene","Agua Fria"
+                      ,"South Mountain","Highland","West Mesa","McDowell Mountain","Arcadia Biltmore","University Lakes","Dreamy Draw","Downtown","Encanto","West McDowell",
+                      "Maryvale","Country Meadows","Moon Valley","Norht valley","Manistee","Arrowhead"] ;
+
+  gmAPI.geocode(geocodeParams, function (err, result) {
+    if (!err) {
+      //console.log("address=> "+ JSON.stringify(geocodeParams.address)); 
+      address_position = result.results[0].geometry.location;
+      // console.log("geocoding => "+ JSON.stringify(Object.keys(result.results[0])));
+      var result = []
+      for (var i = 0; i < area.length; i++) {
+
+        result[i] = geolib.isPointInside(
+          address_position,
           area[i]
-      ); // -> true
-          if (result[i]==true) 
-          {  
-              //console.log("result=>"+ areaname[i]+" court");
-              temp =areaname[i];
-              
-          }
+        ); // -> true
+        if (result[i] == true) {
+          //console.log("result=>"+ areaname[i]+" court");
+          temp = areaname[i];
+
+        }
       }
-    return temp
-  }
-  
+    } else if (error) {
+      reject(error);
+    } else {
+      resolve(' sent: ' );
+    }
+  })
 
 
-  module.exports = {
-    searchmaricopa
-  }
+})
+}
 
 
+// Simulate a async promise delay
 
-
+module.exports = search;      

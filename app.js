@@ -7,12 +7,14 @@ const express     = require("express"),
     LocalStrategy = require("passport-local"),
     methodOverride = require("method-override"),
     Campground  = require("./models/campgrounds"),
+     Newmexico = require("./models/NewMexico"),
     Comment     = require("./models/comment"),
     User        = require("./models/user"),
     Admin       = require("./models/AdminUser")
     seedDB      = require("./seeds");
 var fileUpload = require('./lib/index');
-
+const fetch = require('node-fetch');
+  axios = require('axios');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
@@ -21,28 +23,61 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 var outputPath;
-const forceSync = require('sync-rpc');
-const syncFunction = forceSync(require.resolve('./routes/searchmaricopa'));
+//const syncFunction = forceSync(require.resolve('./routes/searchmaricopa'));
 
 const keys = require('./config/keys');
 const stripe = require('stripe')(keys.stripeSecretKey)
-    
+ 
 //requiring routes
 var commentRoutes    = require("./routes/comments"),
     campgroundRoutes = require("./routes/campgrounds"),
     indexRoutes      = require("./routes/index");
+const { searchmaricopa } = require("./routes/searchmaricopa");
 
 mongoose.connect("mongodb://localhost/database");
+
+
+/* var dbURI='mongodb+srv://root:root@gettingstarted-7udkw.mongodb.net/test?retryWrites=true';
+mongoose.connect(dbURI,function(err){    
+    if(err){ 
+    console.log('Some problem with the connection ' +err)   
+    } 
+    else {
+    console.log('The Mongoose connection is ready')  
+    }
+
+}) */
 mongoose.Promise = require('bluebird');
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(methodOverride("_method"));
+app.use( bodyParser.json());
 app.use(flash());
 // seedDB(); //seed the database
 //Initial user
 User.findOneAndRemove({ username: 'DaveRolf2019' }, function(err) {
   console.log(err);
+});
+
+const Cat = mongoose.model('Cat', { name :String});
+
+app.get('/addKitty', function(req,res) {
+  const kitty = new Cat({ name :'Dragonskin2018'});
+  kitty.save().then(() => console.log('mom'));
+  res.send(kitty);
+});
+
+app.get('/getKitties', async function(req,res) {
+	
+	try {
+		var cats = await Cat.find().then(() => res.send(cats))
+		
+	} catch(error){
+		console.log(error);
+		res.send({error: error.message});
+	}
+	
 });
 
 /* const newuser = new Admin();
@@ -117,18 +152,15 @@ app.use("/campgrounds/:id/comments", commentRoutes);
 }); */
 
 // default options;
-app.get("/",function(req,res){
-  res.render("campgrounds/index",{campgrounds:null,noMatch: null,allhistory:null});
 
-})
 app.use(fileUpload());
 app.post('/upload', function(req, res) {
   let sampleFile;
   let uploadPath;
-
+  let path = "";
   if (Object.keys(req.files).length == 0) {
-    var noMatch = "No File Uploaded!"
-    res.render("campgrounds/index",{campgrounds:null,noMatch:noMatch  }) 
+    req.flash("success", "You didn't upload file");
+    res.render("campgrounds/index",{campgrounds:null,allhistory:null}) 
     return;
   }
 
@@ -138,9 +170,10 @@ app.post('/upload', function(req, res) {
     sampleFile = req.files.sampleFile;
     //console.log("DateType=>"+typeof(Date.now()));
 
+    path = makeid(10);
     //console.log("Date=>"+Date.now());
 
-    uploadPath = __dirname + '/uploads/' + Date.now()+sampleFile.name;
+    uploadPath = __dirname + '/uploads/' + path +sampleFile.name;
      //console.log(" => "+uploadPath);
     sampleFile.mv(uploadPath, function(err) {
       if (err) {
@@ -155,7 +188,7 @@ a,b,c
 4,5,6
 */
   const csvFilePath = uploadPath;
-  outputPath = __dirname + '/uploads/'+ Date.now()+'output.csv';
+  outputPath = __dirname + '/uploads/'+ path+'.csv';
   const output = []; // holds all rows of data
   //csv()
   //.fromFile(csvFilePath)
@@ -168,7 +201,7 @@ a,b,c
        * 	{a:"4", b:"5". c:"6"}
        * ]
        */ 
-      var inputbuff = []
+      var inputbuff = [];
      fs.createReadStream(csvFilePath) 
      .pipe(csv())
      .on('data', (data) => inputbuff.push(data))
@@ -178,154 +211,278 @@ a,b,c
      .on('end', () => {
 
       var result = [];
+      var fileNum =[];
       var searchquery=[];
       var searchzip = [];
       var regex =[];
       var searchData=[];
-      var noMatch = null;
+      var conditionlength;
+
+      (async ( ) => {
       for (var i in inputbuff) {
-        //console.log("JSON => "+JSON.stringify(inputbuff[i]));
-        result[i] = JSON.stringify(Object.values(inputbuff[i])[0]);
-        //console.log("JSON => "+result[i]);
-        searchquery[i] = result[i].slice(result[i].length-6,result[i].length-1).trim();
-        searchzip[i]= parseInt(searchquery[i]);      
-        
-        if (searchzip[i] > 80000 && searchzip[i] < 81659 && searchzip[i] >88900 && searchzip[i] < 89836) {
-          regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
-      }  else if (searchzip[i] >= 85001 && searchzip[i] <= 85385 ) {     
-        /* maricopa.num = i; maricopa.address = result[i];
-        paramadrress.push(maricopa); */
-       //const syncReturn = syncFunction(result[i]);
-        regex[i] =new RegExp(escapeRegex(syncReturn), 'gi');;
-        //console.log("sycnReturn =>"+ syncReturn);
-        //console.log("regex =>"+i+"=>" +regex[i]);
-        searchquery[i] = syncReturn;
-                   
-    }
-    else{
-        regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi'); 
-        //console.log( regex[i]);
-    }
-      }
-      Campground.find({zipcodes: regex}, function(err, allCampgrounds){
-        if(err){
-                console.log(err);
+        console.log("JSON => "+JSON.stringify(inputbuff[i]));
+        fileNum[i] = JSON.stringify(Object.values(inputbuff[i])[0]);
+        console.log("Length=>" + Object.keys(inputbuff[i]).length);
+         conditionlength = Object.keys(inputbuff[i]).length;
+        if (conditionlength === 2) {
+          result[i] = JSON.stringify(Object.values(inputbuff[i])[1]);
+          console.log("JSON => "+result[i]);
+          searchquery[i] = result[i].slice(result[i].length-6,result[i].length-1).trim();
         } else {
-            
-                if(allCampgrounds.length < 1) {
-                    noMatch = "No courts match that query, please try again.";
-                } else{
-                
-                //console.log("alllcamp=>"+ allCampgrounds);
-                for (var i = 0; i< result.length; i ++) {
-                    for (var j = 0; j< allCampgrounds.length; j ++) {
-                        //console.log("allcamp => "+ allCampgrounds);
-                        //console.log("allcamp[j] => "+ allCampgrounds[j]);
-                        var temp= {};
-                        if(allCampgrounds[j].zipcodes.includes(searchquery[i])){
-                          
-                            temp.num = i + 1 ;
-                            if (i == result.length - 1 ) temp.search = result[i];
-                            else {temp.search = result[i];}
-                            temp.districtNum =allCampgrounds[j].judicalDistrictNum;
-                            temp.courtName = allCampgrounds[j].courtName + " Court";
-                            temp.address = allCampgrounds[j].address;
-                            temp.phone = allCampgrounds[j].phone;
-                            temp.filingFee = allCampgrounds[j].filingFee;
-                            searchData.push(temp); break;
-                        } else {
-                            if (j == allCampgrounds.length - 1) {
-                            temp.num = i + 1;
-                            if (i == result.length - 1 ) temp.search = result[i];
-                            else {temp.search = result[i];}
-                            temp.districtNum =null;
-                            temp.courtName = null;
-                            temp.address = "";
-                            temp.phone = null;
-                            temp.filingFee = null;
-                            searchData.push(temp);
-                            }
-                        }
-                    }   
-                }
-                //console.log("Search Data =>"+searchData);
-                
-            } 
-            //res.render("campgrounds/index",{campgrounds:searchData,noMatch: noMatch});  
-            console.log("search => "+ JSON.stringify(searchData))
+          result[i] = Object.values(inputbuff[i])[1]+','+Object.values(inputbuff[i])[2]+',' + 
+            Object.values(inputbuff[i])[3] + ' ' + Object.values(inputbuff[i])[4];
+            searchquery[i] = result[i].slice(result[i].length-6,result[i].length).trim();
         }
-        
-        var header =["Input Address","Distric Number", "Court Name","Court Address","Phone Number","Filing Fee"];
-        output.push(header.join());
-        searchData.forEach((d) => {
-          const row = []; // a new array for each row of data
-          
-          row.push(d.search);
-          row.push(d.districtNum);
-          row.push(d.courtName);
-          row.push(`"${d.address}"`);
-          row.push(d.phone);
-          row.push(d.filingFee);
-          output.push(row.join());
-          //console.log("row =>" +row); // by default, join() uses a ','
-          fs.writeFileSync(outputPath, output.join(os.EOL)); 
-        });
-        console.log("outputpath=>"+output);
-        noMatch = "Upload completed";
-        req.flash("success", "Upload Completed! You can download now");
-        res.render("campgrounds/index",{campgrounds:null,noMatch:noMatch,allhistory:null  }) 
-        if(req.user) {
-          User.findOne({username:req.user.username}, function(err, user){
-              if(err){
-                  console.log(err);
-                  res.redirect("/campgrounds");
-              } else {
-                  searchData.forEach((data,index) => {
-                      Comment.create(data, function(err, comment){
-                          if(err){
-                              
-                              console.log(err);
-                          } else {
-                              //add username and id to comment
-                             
-                              comment.username = req.user.username;
-                              comment.search = data.search;
-                              comment.courtName = data.courtName;
-                              comment.address = data.address;
-                              comment.phone = data.phone;
-                              comment.filingFee = data.filingFee
-                              //save comment
-                              comment.save();
-                              
-                          }
-                       });
-                  });
-              }
-          });
-     
-  }
        
-    });   
-      //console.log("regex => "+ regex)
-      //console.log("JSON Length= "+jsonObj.length);
-      //var myJSON = JSON.stringify(jsonObj[1]. Address);
+        
+        searchzip[i]= parseInt(searchquery[i]);      
+                  
+       
+
+            if ((searchzip[i] > 80000 && searchzip[i] < 81659) || (searchzip[i] > 88900 && searchzip[i] < 89836)) {
+              regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
+              console.log(regex[i]+" "+i);
+              await Campground.findOne({zipcodes:regex[i]}, function(err, allCampgrounds){
+                if(err){
+                        console.log(err);
+                } else {
+                                      // console.log("regex[]=>"+ regex);
+                                      if (allCampgrounds!=null) {
+                                    var temp ={};
+                                    temp.search = result[i];
+                                    temp.fileNum = fileNum[i];
+                                   temp.num = 0 ;
+                                    temp.districtNum =allCampgrounds.judicalDistrictNum;
+                                    if ( allCampgrounds.courtName.includes("court") || allCampgrounds.courtName.includes("Court") ) {
+                                      temp.courtName = allCampgrounds.courtName
+                                    } else {
+                                      temp.courtName = allCampgrounds.courtName + " Court";
+                                    }
+                                    temp.address = allCampgrounds.address;
+                                    temp.phone = allCampgrounds.phone;
+                                    temp.filingFee = allCampgrounds.filingFee;
+                                    searchData.push(temp); 
+                        console.log("Search Data =>"+JSON.stringify(searchData));
+                      } else {
+                        
+                      }
+                        
+                    } 
+              }) 
+            } else if (searchzip[i] >= 85001 && searchzip[i] <= 85385) {
+              var fetchstring = 'https://maps.googleapis.com/maps/api/geocode/json?address='+result[i]+'&key=AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI';      
+              regex[i] = await getquery(fetchstring);
+               await Campground.findOne({courtName:regex[i]}, function(err, allCampgrounds){
+                if(err){
+                        console.log(err);
+                } else {
+
+                  // console.log("regex[]=>"+ regex);
+
+                  var temp ={};
+
+                  temp.search = result[i];
+                  temp.fileNum = fileNum[i];
+                  temp.num = 0;
+                  temp.districtNum =allCampgrounds.judicalDistrictNum;
+                  if ( allCampgrounds.courtName.includes("court") ) {
+                    temp.courtName = allCampgrounds.courtName
+                  } else {
+                    temp.courtName = allCampgrounds.courtName + " Court";
+                  }
+                  
+                  temp.address = allCampgrounds.address;
+                  temp.phone = allCampgrounds.phone;
+                  temp.filingFee = allCampgrounds.filingFee;
+                  searchData.push(temp);
+
+                  console.log("Search Data =>"+JSON.stringify(searchData));                        
+                } 
+                    
+              })
+                console.log(regex[i]+" "+i);
+            } else if (searchzip[i] >= 87001 && searchzip[i] <= 88439) {
+              regex[i] = result[i].split(",")[1];
+              regex[i] = new RegExp(escapeRegex(regex[i]), 'gi');
+              console.log("cities"+ regex[i]);
+             await Newmexico.find({queryCities:regex[i]}, function(err, allCampgrounds){
+                  if(err){
+                          console.log(err);
+                  } else {
+                                        // console.log("regex[]=>"+ regex);
+                                  allCampgrounds.forEach(function(allCampground,index){
+                                      var temp ={};
+                                      if(allCampgrounds.length == 1) {temp.num = 0}
+                                      else {temp.num = allCampgrounds.length - index;}
+                                      temp.search = result[i];
+                                      temp.fileNum = temp.fileNum = fileNum[i];
+                                      temp.courtName = allCampground.courtName  ;
+                                      temp.districtNum =allCampground.judicalDistrictNum;
+                                      temp.address = allCampground.address;
+                                      temp.phone = allCampground.phone;
+                                      temp.filingFee = allCampground.filingFee;
+                                      temp.courtType = allCampground.courtType;
+                                      searchData.push(temp); 
+                                  })
+                          console.log("Search Data =>"+JSON.stringify(searchData));
+                          
+                      } 
+                     
+                      if(req.user) {
+                          User.findOne({username:req.user.username}, function(err, user){
+                              if(err){
+                                  console.log(err);
+                                  res.redirect("/campgrounds");
+                              } else {
+                                  searchData.forEach((data,index) => {
+                                      Comment.create(data, function(err, comment){
+                                          if(err){
+                                              
+                                              console.log(err);
+                                          } else {
+                                              //add username and id to comment
+                                             
+                                              comment.username = req.user.username;
+                                              comment.search = data.search;
+                                              comment.courtName = data.courtName;
+                                              comment.address = data.address;
+                                              comment.phone = data.phone;
+                                              comment.filingFee = data.filingFee;
+                                              //save comment
+                                              comment.save();
+                                              console.log(comment);
+                                              
+                                          }
+                                       });
+                                  });
+                              }
+                          });
+                     
+                  }
+                  
+                              
+              });
+            } 
+            else {
+              regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
+              console.log(regex[i]+" "+i);
+              var temp ={};
+              var errortext = `Your court information could not be found. 1. Please verify your input address is a valid address. 2. The address might be located outside of our developed states. Please refer to our home page for a current development map.` ;
+                                    temp.search = result[i];
+                                    temp.fileNum = fileNum[i];
+                                    temp.num = 0;
+                                    temp.courtName = errortext;
+                                    temp.address = " ";
+                                    temp.phone = null;
+                                    temp.filingFee = null;
+                                    temp.courtType = null;
+                                    searchData.push(temp); 
+    
+            }
+          //console.log("address_res =>"+ JSON.stringify(address_position));
+         /*  var address_latlng = address_position.results[0].geometry.location;
+          var courtname = searchmaricopa(address_latlng);
+          console.log("AZ =>"+ courtname); var address_position = 
+           */
+         
+        }
+      
+      var header =["File Number","Input Address","Distric Number","Court Type", "Court Name","Court Address","Phone Number","Filing Fee","Distric Number","Court Type", "Court Name","Court Address","Phone Number","Filing Fee"];
+          output.push(header.join());
+          let row = [];
+        await  searchData.forEach( (d) => {
+             // a new array for each row of data
+             if (d.num ==0 ) {
+              row.push(d.fileNum);
+              if (conditionlength===2) {
+                row.push(d.search);
+              } else {
+                row.push(`"${d.search}"`);
+              }
+              row.push(d.districtNum);
+              row.push(d.courtType);
+              row.push(d.courtName);
+              row.push(`"${d.address}"`);
+              row.push(d.phone);
+              row.push(d.filingFee);
+              output.push(row.join());
+              row = [];
+             }
+            else if(d.num != 1){
+              row.push(d.fileNum);
+            if (conditionlength===2) {
+              row.push(d.search);
+            } else {
+              row.push(`"${d.search}"`);
+            }
+            row.push(d.districtNum);
+            row.push(d.courtType);
+            row.push(d.courtName);
+            row.push(`"${d.address}"`);
+            row.push(d.phone);
+            row.push(d.filingFee);
+            
+          } else {
+            //row.push(d.fileNum);
+           /*  if (conditionlength===2) {
+              row.push(d.search);
+            } else {
+              row.push(`"${d.search}"`);
+            } */
+            row.push(d.districtNum);
+            row.push(d.courtType);
+            row.push(d.courtName);
+            row.push(`"${d.address}"`);
+            row.push(d.phone);
+            row.push(d.filingFee);
+           
+           
+            output.push(row.join());
+            row = [];
+          }
+
+            
+            
+            //console.log("row =>" +row); // by default, join() uses a ','
+         fs.writeFileSync(outputPath, output.join(os.EOL)); 
+          });
+          console.log("outputpath=>"+outputPath);
+          try {
+            if (fs.existsSync(outputPath)) {
+              //file exists
+              await res.download(outputPath);
+            } else {
+              setTimeout(await res.download(outputPath), 3000);
+              
+            }
+          } catch(err) {
+            console.error(err);
+            res.redirect("/campgrounds");
+          }
+    
+      })()
+
+       
      
-      //res.render("campgrounds/index",{campgrounds:null,noMatch:myJSON });
   })
  
 // Async / await usage
 //const jsonArray=await csv().fromFile(csvFilePath);
     } else {
-      var noMatch = 'Sorry, File uploaded failed: Try to upload csv file ';
-      res.render("campgrounds/index",{campgrounds:null,noMatch: noMatch}); 
+      req.flash("success","Please upload again!")
+      res.render("campgrounds/index",{campgrounds:null,allhistory:null}); 
     }
  });
- app.post('/download', function(req, res){
+
+
+ /* app.post('/download', function(req, res){
   if(outputPath !==undefined) {
   res.download(outputPath);
-} else{  res.render("campgrounds/index",{campgrounds:null,noMatch:"You didn't upload address file!" })
+} else{  
+  req.flash("success","You didn't upload file");
+  res.render("campgrounds/index",{campgrounds:null,allhistory:null });
 }
-});
+}); */
 /* stripe.products.create({
   name: 'Monthlymembership',
   type: 'service',
@@ -423,14 +580,255 @@ app.get('/charge',(req,res)=>{
   res.redirect("/login")
 })
 
+app.get('/ajaxcall/:id', function (req,res) {
+  Comment.find({username:req.params.id}, function(err, allhistory){
+    if(err){
+      console.log(req);
+      console.log(err);
+    }
+    res.send(allhistory);
+  })
+  
+  
+})
 
-app.get('/history',(req,res) =>{
+app.post('/getsearch/:id', function (req,res) {
+ 
+  console.log(req.body);
+  var searchData =[];
+    
+    //console.log(req);
+    if(req.body.text ) {
+        var result;
+        var searchquery=[];
+        var searchzip =[]
+        result = req.body.text;
+        //console.log(typeof(req.query.search));
+        //console.log("result "+result.length);
+        if(result.length <= 13) {
+          var error = "error"
+           res.send(error);
+
+        } else {
+            searchquery = result.slice(result.length-6,result.length).trim();
+            searchzip= parseInt(searchquery);
+            if ((searchzip > 80000 && searchzip < 81659) || (searchzip >88900 && searchzip < 89836)) {
+                regex = new RegExp(escapeRegex(searchquery), 'gi');
+                Campground.findOne({zipcodes:regex}, function(err, allCampgrounds){
+                    if(err){
+                            console.log(err);
+                            var error = "error"
+                            res.send(error);                 
+                    } else {
+                                          // console.log("regex[]=>"+ regex);
+                                        var temp ={};
+                                        temp.search = req.body.text;
+                                        temp.courtName = allCampgrounds.courtName + " Court";
+                                        temp.address = allCampgrounds.address;
+                                        temp.phone = allCampgrounds.phone;
+                                        temp.filingFee = allCampgrounds.filingFee;
+                                        searchData.push(temp); 
+                            console.log("Search Data =>"+JSON.stringify(searchData));
+                            
+                        } 
+                        res.send(searchData);
+                        if(req.params.id) {
+                            User.findOne({username:req.params.id}, function(err, user){
+                                if(err){
+                                    console.log(err);
+                                    res.redirect("/campgrounds");
+                                } else {
+                                    searchData.forEach((data,index) => {
+                                        Comment.create(data, function(err, comment){
+                                            if(err){
+                                                
+                                                console.log(err);
+                                            } else {
+                                                //add username and id to comment
+                                               
+                                                comment.username = req.params.id;
+                                                comment.search = data.search;
+                                                comment.courtName = data.courtName;
+                                                comment.address = data.address;
+                                                comment.phone = data.phone;
+                                                comment.filingFee = data.filingFee;
+                                                //save comment
+                                                comment.save();
+                                                console.log(comment);
+                                                
+                                            }
+                                         });
+                                    });
+                                }
+                            });
+                       
+                    }
+                    
+                                
+                });
+            }  else if (searchzip >= 85001 && searchzip <= 85385 ) {     
+              /* maricopa.num = i; maricopa.address = result[i];
+              paramadrress.push(maricopa); */
+              var fetchstring = 'https://maps.googleapis.com/maps/api/geocode/json?address='+result+'&key=AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI'
+            fetch(fetchstring)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (myJson) {
+                    //console.log(JSON.stringify(myJson));
+                   var address_position = myJson.results[0].geometry.location;
+                   //console.log(JSON.stringify(address_position));
+                   var courtname = searchmaricopa(address_position);
+                   console.log("AZ =>"+ courtname);
+                   regex =courtname;
+                   Campground.findOne({courtName:regex}, function(err, allCampgrounds){
+                    if(err){
+                            console.log(err);
+                    } else {
+                                          // console.log("regex[]=>"+ regex);
+                                        var temp ={};
+                                        temp.search = req.body.text;
+                                        temp.courtName = allCampgrounds.courtName + " Court";
+                                        temp.address = allCampgrounds.address;
+                                        temp.phone = allCampgrounds.phone;
+                                        temp.filingFee = allCampgrounds.filingFee;
+                                        searchData.push(temp); 
+                            console.log("Search Data =>"+JSON.stringify(searchData));
+                            
+                        } 
+                        res.send(searchData);
+                        if(req.params.id) {
+                            User.findOne({username:req.params.id}, function(err, user){
+                                if(err){
+                                    console.log(err);
+                                    var error = "error"
+                                    res.send(error);                         
+                                } else {
+                                    searchData.forEach((data,index) => {
+                                        Comment.create(data, function(err, comment){
+                                            if(err){
+                                                
+                                                console.log(err);
+                                            } else {
+                                                //add username and id to comment
+                                               
+                                                comment.username = req.params.id;
+                                                comment.search = data.search;
+                                                comment.courtName = data.courtName;
+                                                comment.address = data.address;
+                                                comment.phone = data.phone;
+                                                comment.filingFee = data.filingFee;
+                                                //save comment
+                                                comment.save();
+                                                console.log(comment);
+                                                
+                                            }
+                                         });
+                                    });
+                                }
+                            });
+                       
+                    }
+                    
+                                
+                });
+                });
+             /* const syncReturn = syncFunction(result[i]);
+              regex[i] =new RegExp(escapeRegex(syncReturn), 'gi');
+              //console.log("sycnReturn =>"+ syncReturn);
+              //console.log("regex =>"+i+"=>" +regex[i]);
+              searchquery[i] = syncReturn; */
+                         
+          } else if (searchzip >= 87001 && searchzip <= 88439) {
+            regex = result.split(",")[1];
+            regex = regex = new RegExp(escapeRegex(regex), 'gi');
+            console.log("cities"+ regex);
+            Newmexico.find({queryCities:regex}, function(err, allCampgrounds){
+                if(err){
+                        console.log(err);
+                } else {
+                                      // console.log("regex[]=>"+ regex);
+                                allCampgrounds.forEach(function(allCampground,index){
+                                    var temp ={};
+                                    temp.search = req.query.search;
+                                    temp.courtName = allCampground.courtName  ;
+                                    temp.address = allCampground.address;
+                                    temp.phone = allCampground.phone;
+                                    temp.filingFee = allCampground.filingFee;
+                                    temp.courtType = allCampground.courtType;
+                                    searchData.push(temp); 
+                                })
+                        console.log("Search Data =>"+JSON.stringify(searchData));
+                        
+                    } 
+                    res.send(searchData);
+                    if(req.user) {
+                        User.findOne({username:req.params.id}, function(err, user){
+                            if(err){
+                                console.log(err);
+                                res.redirect("/campgrounds");
+                            } else {
+                                searchData.forEach((data,index) => {
+                                    Comment.create(data, function(err, comment){
+                                        if(err){
+                                            
+                                            console.log(err);
+                                        } else {
+                                            //add username and id to comment
+                                           
+                                            comment.username = req.params.id;
+                                            comment.search = data.search;
+                                            comment.courtName = data.courtName;
+                                            comment.address = data.address;
+                                            comment.phone = data.phone;
+                                            comment.filingFee = data.filingFee;
+                                            //save comment
+                                            comment.save();
+                                            console.log(comment);
+                                            
+                                        }
+                                     });
+                                });
+                            }
+                        });
+                   
+                }
+                
+                            
+            });
+          }
+          else{
+              regex = new RegExp(escapeRegex(searchquery), 'gi'); 
+              
+          }
+    
+        }
+       
+    } else {
+        // Get all campgrounds from DB
+        Campground.find({}, function(err, allCampgrounds){
+           if(err){
+               console.log(err);
+               var error = "error";
+               res.send(error);
+           } else {
+             var error = "error"
+              res.send(error)
+           }
+        });
+    }
+  
+  
+})
+
+app.get('/history/:id',(req,res) =>{
   //console.log(req);
   Comment.find({username:req.user.username}, function(err, allhistory){
     if(err){
+      console.log(req);
       console.log(err);
     }
-    res.render("campgrounds/index",{campgrounds:null,noMatch: null,allhistory:allhistory});
+    res.render("campgrounds/index",{campgrounds:null,allhistory:allhistory});
   })
   //.then(subscription => res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." }));
 
@@ -447,3 +845,36 @@ function escapeRegex(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
+function makeid(length) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < length; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+
+
+async function getquery(address) {
+  try {
+    // fetch data from a url endpoint
+    const response = await axios({
+      method: 'get',
+      url:  address,
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+      }
+    });
+    //const data = await response.map(res => res );;
+    //console.log("response "+Object.keys(response));
+   
+    var courtname = searchmaricopa(response.data.results[0].geometry.location);
+    console.log("=>"+courtname);
+    return courtname;
+  } catch (error) {
+    console.log(error); // catches both errors
+  }
+}

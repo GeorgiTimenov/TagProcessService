@@ -1,130 +1,228 @@
 var express = require("express");
 var router  = express.Router();
 var Campground = require("../models/campgrounds");
+var Newmexico = require("../models/NewMexico");
 var middleware = require("../middleware");
 var csrf = require('csurf');
 var passport = require('passport');
 var csrfProtection = csrf();
 var User = require("../models/user");
 var Comment = require("../models/comment");
+var JSAlert = require("js-alert");
+
 router.use(csrfProtection);
     const forceSync = require('sync-rpc');
-    const syncFunction = forceSync(require.resolve('./searchmaricopa'));
-
-
+   // const syncFunction = forceSync(require.resolve('./searchmaricopa'));
+const fetch = require('node-fetch');
+const { searchmaricopa } = require('./searchmaricopa');
     var regex =[];
 //INDEX - show all campgrounds
 router.get("/", function(req, res){
     var searchData =[];
-    var noMatch = null;
+    
     //console.log(req);
     if(req.query.search ) {
         var result;
         var searchquery=[];
         var searchzip =[]
-        result = req.query.search.trim().split("\n");
+        result = req.query.search;
         //console.log(typeof(req.query.search));
         //console.log("result "+result.length);
-        for(var i = 0; i< result.length;i++ ) { 
-            searchquery[i] = result[i].slice(result[i].length-6,result[i].length).trim();
-            searchzip[i]= parseInt(searchquery[i]);
-            if ((searchzip[i] > 80000 && searchzip[i] < 81659) || (searchzip[i] > 80000 && searchzip[i])) {
-                regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
-            } 
-            else if (searchzip[i] >= 0 && searchzip[i] < 99950 ) {     
-                /* maricopa.num = i; maricopa.address = result[i];
-                paramadrress.push(maricopa); */
-               const syncReturn = syncFunction(result[i]);
-                regex[i] =new RegExp(escapeRegex(syncReturn), 'gi');;
-                //console.log("sycnReturn =>"+ syncReturn);
-                //console.log("regex =>"+i+"=>" +regex[i]);
-                searchquery[i] = syncReturn;
-                           
-            }
-            else{
-                regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi'); 
-            }
-            }
-           
-         Campground.find({zipcodes:regex}, function(err, allCampgrounds){
-            if(err){
-                    console.log(err);
-            } else {
-                                  // console.log("regex[]=>"+ regex);
+        if(result.length <= 13) {
+          
+            res.render("campgrounds/index",{campgrounds:null,allhistory:null});
 
-                    if(allCampgrounds.length < 1) {
-                        noMatch = "No courts match that query, please try again.";
-                    } else{
-                    
-                    for (var i = 0; i< result.length; i ++) {
-                        for (var j = 0; j< allCampgrounds.length; j ++) {
-                            //console.log("allcamp => "+ allCampgrounds);
-                            //console.log("allcamp[j] => "+ allCampgrounds[j]);
-                            var temp= {};
-                            if(allCampgrounds[j].zipcodes.includes(searchquery[i])){
-                               
-                                temp.num = i + 1 ;
-                                if (i == result.length - 1 ) temp.search = result[i]+"\n";
-                                else {temp.search = result[i];}
-                                temp.courtName = allCampgrounds[j].courtName + " Court";
-                                temp.address = allCampgrounds[j].address;
-                                temp.phone = allCampgrounds[j].phone;
-                                temp.filingFee = allCampgrounds[j].filingFee;
-                                searchData.push(temp); break;
-                               
-                                
-                            } else {
-                                if (j == allCampgrounds.length - 1) {
-                                temp.num = i + 1;
-                                if (i == result.length - 1 ) temp.search = result[i]+"\n";
-                                else {temp.search = result[i];}
-                                temp.courtName = "Sorry, We can't find the proper Court\n Please type correct Address"
-                                searchData.push(temp);
-                                }
-                            }
-                        }   
-                    }
-                    //console.log("Search Data =>"+searchData);
-                    
-                } 
-                res.render("campgrounds/index",{campgrounds:searchData,noMatch: null,allhistory:null});
-                if(req.user) {
-                    User.findOne({username:req.user.username}, function(err, user){
-                        if(err){
+        } else {
+            searchquery = result.slice(result.length-6,result.length).trim();
+            searchzip= parseInt(searchquery);
+            if ((searchzip > 80000 && searchzip < 81659) || (searchzip >88900 && searchzip < 89836)) {
+                regex = new RegExp(escapeRegex(searchquery), 'gi');
+                Campground.findOne({zipcodes:regex}, function(err, allCampgrounds){
+                    if(err){
                             console.log(err);
-                            res.redirect("/campgrounds");
-                        } else {
-                            searchData.forEach((data,index) => {
-                                Comment.create(data, function(err, comment){
-                                    if(err){
-                                        
-                                        console.log(err);
-                                    } else {
-                                        //add username and id to comment
-                                       
-                                        comment.username = req.user.username;
-                                        comment.search = data.search;
-                                        comment.courtName = data.courtName;
-                                        comment.address = data.address;
-                                        comment.phone = data.phone;
-                                        comment.filingFee = data.filingFee;
-                                        //save comment
-                                        comment.save();
-                                        console.log(comment);
-                                        
-                                    }
-                                 });
+                    } else {
+                                          // console.log("regex[]=>"+ regex);
+                                        var temp ={};
+                                        temp.search = req.query.search;
+                                        temp.courtName = allCampgrounds.courtName + " Court";
+                                        temp.address = allCampgrounds.address;
+                                        temp.phone = allCampgrounds.phone;
+                                        temp.filingFee = allCampgrounds.filingFee;
+                                        searchData.push(temp); 
+                            console.log("Search Data =>"+JSON.stringify(searchData));
+                            
+                        } 
+                        res.render("campgrounds/index",{campgrounds:searchData,allhistory:null});
+                        if(req.user) {
+                            User.findOne({username:req.user.username}, function(err, user){
+                                if(err){
+                                    console.log(err);
+                                    res.redirect("/campgrounds");
+                                } else {
+                                    searchData.forEach((data,index) => {
+                                        Comment.create(data, function(err, comment){
+                                            if(err){
+                                                
+                                                console.log(err);
+                                            } else {
+                                                //add username and id to comment
+                                               
+                                                comment.username = req.user.username;
+                                                comment.search = data.search;
+                                                comment.courtName = data.courtName;
+                                                comment.address = data.address;
+                                                comment.phone = data.phone;
+                                                comment.filingFee = data.filingFee;
+                                                //save comment
+                                                comment.save();
+                                                console.log(comment);
+                                                
+                                            }
+                                         });
+                                    });
+                                }
                             });
-                        }
-                    });
-               
-            }
-            }
+                       
+                    }
+                    
+                                
+                });
+            }  else if (searchzip >= 85001 && searchzip <= 85385 ) {     
+              /* maricopa.num = i; maricopa.address = result[i];
+              paramadrress.push(maricopa); */
+              var fetchstring = 'https://maps.googleapis.com/maps/api/geocode/json?address='+result+'&key=AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI'
+            fetch(fetchstring)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (myJson) {
+                    //console.log(JSON.stringify(myJson));
+                   var address_position = myJson.results[0].geometry.location;
+                   //console.log(JSON.stringify(address_position));
+                   var courtname = searchmaricopa(address_position);
+                   console.log("AZ =>"+ courtname);
+                   regex =courtname;
+                   Campground.findOne({courtName:regex}, function(err, allCampgrounds){
+                    if(err){
+                            console.log(err);
+                    } else {
+                                          // console.log("regex[]=>"+ regex);
+                                        var temp ={};
+                                        temp.search = req.query.search;
+                                        temp.courtName = allCampgrounds.courtName + " Court";
+                                        temp.address = allCampgrounds.address;
+                                        temp.phone = allCampgrounds.phone;
+                                        temp.filingFee = allCampgrounds.filingFee;
+                                        searchData.push(temp); 
+                            console.log("Search Data =>"+JSON.stringify(searchData));
+                            
+                        } 
+                        res.render("campgrounds/index",{campgrounds:searchData,allhistory:null});
+                        if(req.user) {
+                            User.findOne({username:req.user.username}, function(err, user){
+                                if(err){
+                                    console.log(err);
+                                    res.redirect("/campgrounds");
+                                } else {
+                                    searchData.forEach((data,index) => {
+                                        Comment.create(data, function(err, comment){
+                                            if(err){
+                                                
+                                                console.log(err);
+                                            } else {
+                                                //add username and id to comment
+                                               
+                                                comment.username = req.user.username;
+                                                comment.search = data.search;
+                                                comment.courtName = data.courtName;
+                                                comment.address = data.address;
+                                                comment.phone = data.phone;
+                                                comment.filingFee = data.filingFee;
+                                                //save comment
+                                                comment.save();
+                                                console.log(comment);
+                                                
+                                            }
+                                         });
+                                    });
+                                }
+                            });
+                       
+                    }
+                    
+                                
+                });
+                });
+             /* const syncReturn = syncFunction(result[i]);
+              regex[i] =new RegExp(escapeRegex(syncReturn), 'gi');
+              //console.log("sycnReturn =>"+ syncReturn);
+              //console.log("regex =>"+i+"=>" +regex[i]);
+              searchquery[i] = syncReturn; */
+                         
+          } else if (searchzip >= 87001 && searchzip <= 88439) {
+            regex = result.split(",")[1];
+            regex = regex = new RegExp(escapeRegex(regex), 'gi');
+            console.log("cities"+ regex);
+            Newmexico.find({queryCities:regex}, function(err, allCampgrounds){
+                if(err){
+                        console.log(err);
+                } else {
+                                      // console.log("regex[]=>"+ regex);
+                                allCampgrounds.forEach(function(allCampground,index){
+                                    var temp ={};
+                                    temp.search = req.query.search;
+                                    temp.courtName = allCampground.courtName  ;
+                                    temp.address = allCampground.address;
+                                    temp.phone = allCampground.phone;
+                                    temp.filingFee = allCampground.filingFee;
+                                    temp.courtType = allCampground.courtType;
+                                    searchData.push(temp); 
+                                })
+                        console.log("Search Data =>"+JSON.stringify(searchData));
                         
-        });
-        
-        //console.log("Dispaly query=" +query);
-             // Get all campgrounds from DB
+                    } 
+                    res.render("campgrounds/index",{campgrounds:searchData,allhistory:null});
+                    if(req.user) {
+                        User.findOne({username:req.user.username}, function(err, user){
+                            if(err){
+                                console.log(err);
+                                res.redirect("/campgrounds");
+                            } else {
+                                searchData.forEach((data,index) => {
+                                    Comment.create(data, function(err, comment){
+                                        if(err){
+                                            
+                                            console.log(err);
+                                        } else {
+                                            //add username and id to comment
+                                           
+                                            comment.username = req.user.username;
+                                            comment.search = data.search;
+                                            comment.courtName = data.courtName;
+                                            comment.address = data.address;
+                                            comment.phone = data.phone;
+                                            comment.filingFee = data.filingFee;
+                                            //save comment
+                                            comment.save();
+                                            console.log(comment);
+                                            
+                                        }
+                                     });
+                                });
+                            }
+                        });
+                   
+                }
+                
+                            
+            });
+          }
+          else{
+              regex = new RegExp(escapeRegex(searchquery), 'gi'); 
+              
+          }
+    
+        }
        
     } else {
         // Get all campgrounds from DB
@@ -132,15 +230,12 @@ router.get("/", function(req, res){
            if(err){
                console.log(err);
            } else {
-              res.render("campgrounds/index",{campgrounds:null, noMatch: noMatch,allhistory:null});
+              res.render("campgrounds/index",{campgrounds:null,allhistory:null});
            }
         });
     }
 });
-router.get("/",function(req,res){
-    res.render("campgrounds/index",{campgrounds:null,noMatch: null,allhistory:null});
 
-})
 //CREATE - add new campground to DB
 /* router.post("/", middleware.isLoggedIn, function(req, res){
     // get data from form and add to campgrounds array
