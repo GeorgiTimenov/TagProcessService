@@ -49,6 +49,7 @@ Please refer to our home page for a current development map.
         <script>
                
         function singlesearch() {
+            $("#singlechart").empty();
             var inputaddress = document.getElementById("single").value;
             console.log(inputaddress);
             $.ajax({
@@ -59,7 +60,7 @@ Please refer to our home page for a current development map.
             }).done(function(data)
             {
                 console.log(data);
-                $("#singlechart").empty();
+              
             if(data =="error") {
                 var errormessagehead = `Your court information could not be found.` 
                 var errormessagebody1 = "1. Please verify your input address is a valid address.";
@@ -70,7 +71,7 @@ Please refer to our home page for a current development map.
             } else {
                 $("#singlechart").css("color","black");
             $.each( data , function( index, eachdata ){
-            $("#singlechart").append(`<tr><th></th><th>Input</th><th>Output</th></tr><tr><td></td><td>${eachdata.search}</td><td>${eachdata.courtName}</td></tr><tr><td></td><td></td><td>${eachdata.address}</td></tr><tr><td></td><td></td><td>${eachdata.phone}</td></tr><tr><td></td><td></td><td>Filing Fee: ${eachdata.filingFee}</td></tr><tr></tr>`);
+            $("#singlechart").append(`<tr><th></th><th>Input</th><th>Output</th></tr><tr><td></td><td>${eachdata.search}</td><td>&nbsp;${eachdata.courtName}</td></tr><tr><td></td><td></td><td>${eachdata.address}</td></tr><tr><td></td><td></td><td>${eachdata.phone}</td></tr><tr><td></td><td></td><td>Filing Fee: ${eachdata.filingFee}</td></tr><tr></tr><tr><td></td><td></td><td>Court Type: ${eachdata.courtType}</td></tr><tr>`);
             //$("#history").append(`${JSON.stringify(eachdata.search)}<br> ${index}`);
             });
             //$('#getResponse').html(`${JSON.stringify(data)}`);
@@ -154,7 +155,7 @@ Please refer to our home page for a current development map.
         <div class="col-md-12 text-center" style="padding-top:10rem;">
             <% if(currentUser.subscription){ %>
                 <h2>Batch Search</h2>
-            <form ref='uploadForm' id='uploadForm' action='/upload' method='post' encType="multipart/form-data" class="form-inline">
+            <form ref='uploadForm' id='uploadForm' action='/upload/<%= currentUser.username %>' method='post' encType="multipart/form-data" class="form-inline">
                 <!-- COMPONENT START -->
                 <h3>Select the file format you will upload</h3>
                 <table class=" table table-responsive">

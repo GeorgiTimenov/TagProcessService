@@ -1,15 +1,17 @@
 var mongoose = require("mongoose");
 
-var campgroundSchema = new mongoose.Schema({
-   
+var azcountySchema = new mongoose.Schema({
+
    judicalDistrictNum: String,
    courtName: String,
    address: String,
    phone: String,
    courtType:String,
-   zipcodes: String,
+   countyname: String,
    filingFee:String
    
 });
 
-module.exports = mongoose.model("colorado", campgroundSchema);
+module.exports = mongoose.model("azcount", azcountySchema);
+
+

@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 
-var campgroundSchema = new mongoose.Schema({
+var azzipcodeSchema = new mongoose.Schema({
    
    judicalDistrictNum: String,
    courtName: String,
@@ -12,4 +12,4 @@ var campgroundSchema = new mongoose.Schema({
    
 });
 
-module.exports = mongoose.model("colorado", campgroundSchema);
+module.exports = mongoose.model("azzipcode", azzipcodeSchema);

@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 
-var maricopaSchema = new mongoose.Schema({
+var pinalSchema = new mongoose.Schema({
    
    districtNum: String,
    courtName: String,
@@ -12,4 +12,4 @@ var maricopaSchema = new mongoose.Schema({
    
 });
 
-module.exports = mongoose.model("maricopa", maricopaSchema);
+module.exports = mongoose.model("pinal", pinalSchema);

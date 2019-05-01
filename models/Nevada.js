@@ -6,10 +6,11 @@ var campgroundSchema = new mongoose.Schema({
    courtName: String,
    address: String,
    phone: String,
-   courtType:String,
    zipcodes: String,
-   filingFee:String
+   filingFee:String,
+   courtType:String,
+   Filingfeenotes:String
    
 });
 
-module.exports = mongoose.model("colorado", campgroundSchema);
+module.exports = mongoose.model("nevada", campgroundSchema);
