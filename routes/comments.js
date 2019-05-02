@@ -63,7 +63,7 @@ router.put("/:comment_id", middleware.checkCommentOwnership, function(req, res){
       if(err){
           res.redirect("back");
       } else {
-          res.redirect("/campgrounds/" + req.params.id );
+          res.redirect("/search/" + req.params.id );
       }
    });
 });
@@ -77,7 +77,7 @@ router.delete("/:comment_id", middleware.checkCommentOwnership, function(req, re
        } else {
            
            req.flash("success", "Comment deleted");
-           res.redirect("/campgrounds/" + req.params.id);
+           res.redirect("/search/" + req.params.id);
        }
     });
 });

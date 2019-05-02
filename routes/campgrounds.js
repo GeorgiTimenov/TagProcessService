@@ -57,7 +57,7 @@ router.get("/", function(req, res){
                             User.findOne({username:req.user.username}, function(err, user){
                                 if(err){
                                     console.log(err);
-                                    res.redirect("/campgrounds");
+                                    res.redirect("/search");
                                 } else {
                                     searchData.forEach((data,index) => {
                                         Comment.create(data, function(err, comment){
@@ -122,7 +122,7 @@ router.get("/", function(req, res){
                             User.findOne({username:req.user.username}, function(err, user){
                                 if(err){
                                     console.log(err);
-                                    res.redirect("/campgrounds");
+                                    res.redirect("/search");
                                 } else {
                                     searchData.forEach((data,index) => {
                                         Comment.create(data, function(err, comment){
@@ -186,7 +186,7 @@ router.get("/", function(req, res){
                         User.findOne({username:req.user.username}, function(err, user){
                             if(err){
                                 console.log(err);
-                                res.redirect("/campgrounds");
+                                res.redirect("/search");
                             } else {
                                 searchData.forEach((data,index) => {
                                     Comment.create(data, function(err, comment){
@@ -292,10 +292,10 @@ router.put("/:id",middleware.checkCampgroundOwnership, function(req, res){
     // find and update the correct campground
     Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground){
        if(err){
-           res.redirect("/campgrounds");
+           res.redirect("/search");
        } else {
            //redirect somewhere(show page)
-           res.redirect("/campgrounds/" + req.params.id);
+           res.redirect("/search/" + req.params.id);
        }
     });
 });
@@ -304,9 +304,9 @@ router.put("/:id",middleware.checkCampgroundOwnership, function(req, res){
 router.delete("/:id",middleware.checkCampgroundOwnership, function(req, res){
    Campground.findByIdAndRemove(req.params.id, function(err){
       if(err){
-          res.redirect("/campgrounds");
+          res.redirect("/search");
       } else {
-        res.redirect("/campgrounds");
+        res.redirect("/search");
       }
    });
 });

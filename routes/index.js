@@ -79,7 +79,7 @@ router.post('/login',async(req,res) => {
     }
     req.logIn(user, function(err) {
       if (err) { return next(err); }
-      var redirectTo = req.session.redirectTo ? req.session.redirectTo : '/campgrounds';
+      var redirectTo = req.session.redirectTo ? req.session.redirectTo : '/search';
       delete req.session.redirectTo;
       req.flash("success", user.username+"  logged in!  ");
       res.redirect(redirectTo);

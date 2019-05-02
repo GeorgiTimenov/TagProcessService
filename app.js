@@ -146,7 +146,7 @@ app.use(function(req, res, next){
 });
 
 app.use("/", indexRoutes);
-app.use("/campgrounds", campgroundRoutes);
+app.use("/search", campgroundRoutes);
 app.use("/adminpanel", campgroundRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
 
@@ -180,10 +180,12 @@ app.post('/upload/:id', function(req, res) {
     //console.log("Date=>"+Date.now());
 
     uploadPath = __dirname + '/uploads/' + path +sampleFile.name;
-     //console.log(" => "+uploadPath);
+     console.log(" => "+uploadPath);
     sampleFile.mv(uploadPath, function(err) {
       if (err) {
+        res.redirect("/search");
         return res.status(500).send(err);
+
       }
      
       
@@ -656,7 +658,7 @@ a,b,c
           User.find({username:req.params.id}, function(err, user){
               if(err){
                   console.log(err);
-                  res.redirect("/campgrounds");
+                  res.redirect("/search");
               } else {
                   searchData.forEach((data,index) => {
                       Comment.create(data, function(err, comment){
@@ -754,12 +756,12 @@ a,b,c
             } else {
               var err = "error"
               console.error(err);
-            res.redirect("/campgrounds");
+            res.redirect("/search");
             }
               
           } catch(err) {
             console.error(err);
-            res.redirect("/campgrounds");
+            res.redirect("/search");
           }
     
       })()
@@ -836,7 +838,7 @@ app.post('/charge/:id',(req,res) =>{
         console.log(doc);
     });
     req.flash("success", req.params.id+", Your subscription was set correctly");
-    res.redirect("/campgrounds");
+    res.redirect("/search");
 
     //res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." });
    
@@ -869,7 +871,7 @@ app.get('/downgrade/:id',(req,res) =>{
           console.log(doc);
       });
       req.flash("success", req.params.id+", Your subscription was canceled correctly");
-      res.redirect("/campgrounds");
+      res.redirect("/search");
   
       //res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." });
      
@@ -948,7 +950,7 @@ app.post('/getsearch/:id', function (req,res) {
                             User.findOne({username:req.params.id}, function(err, user){
                                 if(err){
                                     console.log(err);
-                                    res.redirect("/campgrounds");
+                                    res.redirect("/search");
                                 } else {
                                     searchData.forEach((data,index) => {
                                         Comment.create(data, function(err, comment){
@@ -1009,7 +1011,7 @@ app.post('/getsearch/:id', function (req,res) {
                             User.findOne({username:req.params.id}, function(err, user){
                                 if(err){
                                     console.log(err);
-                                    res.redirect("/campgrounds");
+                                    res.redirect("/search");
                                 } else {
                                     searchData.forEach((data,index) => {
                                         Comment.create(data, function(err, comment){
@@ -1399,7 +1401,7 @@ app.post('/getsearch/:id', function (req,res) {
                         User.findOne({username:req.params.id}, function(err, user){
                             if(err){
                                 console.log(err);
-                                res.redirect("/campgrounds");
+                                res.redirect("/search");
                             } else {
                                 searchData.forEach((data,index) => {
                                     Comment.create(data, function(err, comment){
@@ -1468,7 +1470,7 @@ app.post('/getsearch/:id', function (req,res) {
                         User.findOne({username:req.params.id}, function(err, user){
                             if(err){
                                 console.log(err);
-                                res.redirect("/campgrounds");
+                                res.redirect("/search");
                             } else {
                                 searchData.forEach((data,index) => {
                                     Comment.create(data, function(err, comment){
@@ -1527,7 +1529,7 @@ app.post('/getsearch/:id', function (req,res) {
 
 app.get('/history/:id',(req,res) =>{
   //console.log(req);
-  Comment.find({username:params.id}, function(err, allhistory){
+  Comment.find({username:req.params.id}, function(err, allhistory){
     if(err){
       console.log(req);
       console.log(err);
