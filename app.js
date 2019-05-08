@@ -447,10 +447,10 @@ a,b,c
                
     
             } else if (searchzip[i] >= 87001 && searchzip[i] <= 88439) {
-              regex[i] = result[i].split(",")[1];
-              regex[i] = new RegExp(escapeRegex(regex[i]), 'gi');
+             
+              regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
               console.log("cities"+ regex[i]);
-             await Newmexico.find({queryCities:regex[i]}, function(err, allCampgrounds){
+             await Newmexico.find({zipcodes:regex[i]}, function(err, allCampgrounds){
                   if(err){
                           console.log(err);
                   } else {
@@ -1371,10 +1371,9 @@ app.post('/getsearch/:id', function (req,res) {
               searchquery[i] = syncReturn; */
                          
           } else if (searchzip >= 87001 && searchzip <= 88439) {
-            regex = result.split(",")[1];
-            regex = new RegExp(escapeRegex(regex), 'gi');
+            regex = new RegExp(escapeRegex(searchquery), 'gi');
             console.log("cities"+ regex);
-            Newmexico.find({queryCities:regex}, function(err, allCampgrounds){
+            Newmexico.find({zipcodes:regex}, function(err, allCampgrounds){
                 if(err){
                         console.log(err);
                 } else {
