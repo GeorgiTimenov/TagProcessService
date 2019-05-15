@@ -11,7 +11,7 @@
     <header class="">
         <% if(currentUser){ %>
             <% if(currentUser.subscription){ %>
-        
+                
         <!-- <script type="text/javascript">
             
         function frontvalidation() {
@@ -55,7 +55,7 @@ Please refer to our home page for a current development map.
             $.ajax({
                 url: `/getsearch/<%= currentUser.username %>`,
                 type:'POST',
-                data: { text: inputaddress },
+                data: { text: inputaddress, accessid : `<%= currentUser.accessid %>` },
                 
             }).done(function(data)
             {
@@ -68,7 +68,14 @@ Please refer to our home page for a current development map.
                 var errormessagebody3 = "Please refer to our home page for a current development map."
                 $("#singlechart").css("color","red");                                   
                 $("#singlechart").append(`<tr><th>${errormessagehead}</th></tr><tr><td>${errormessagebody1}</td></tr><tr><td>${errormessagebody2}</td></tr><tr><td>${errormessagebody3}</td></tr>`);
-            } else {
+            } else if (data =="accesserror") {
+                var errormessagehead = `Your court information could not be found.` 
+                var errormessagebody1 = "You do not have access about this area";
+                var errormessagebody2 = "Contact us, if you would like to add this area to your subscription.";
+                var errormessagebody3 = ""
+                $("#singlechart").css("color","red");                                   
+                $("#singlechart").append(`<tr><th>${errormessagehead}</th></tr><tr><td>${errormessagebody1}</td></tr><tr><td>${errormessagebody2}</td></tr><tr><td>${errormessagebody3}</td></tr>`);
+            }else {
                 $("#singlechart").css("color","black");
             $.each( data , function( index, eachdata ){
             $("#singlechart").append(`<tr><th></th><th>Input</th><th>Output</th></tr><tr><td></td><td>${eachdata.search}</td><td>&nbsp;${eachdata.courtName}</td></tr><tr><td></td><td></td><td>${eachdata.address}</td></tr><tr><td></td><td></td><td>${eachdata.phone}</td></tr><tr><td></td><td></td><td>Filing Fee: ${eachdata.filingFee}</td></tr><tr></tr><tr><td></td><td></td><td>Court Type: ${eachdata.courtType}</td></tr><tr>`);
@@ -98,7 +105,7 @@ Please refer to our home page for a current development map.
                         </div>
                       </div>
                     </div>
-                  </div>
+            </div>
            
         <div class="  text-center">
                 <%if(campgrounds !== null){%>
@@ -141,21 +148,49 @@ Please refer to our home page for a current development map.
                 <% } %>
             </div>
         <% } else { %>
-        <div class="text-center" style = "margin-top:24rem;">
+        <div class="text-center" style = "margin-top:5rem;">
                 <h2 class=>Step 2 of 2</h2>
-                <h3> Enter your payment information to start your unlimited monthly subscription. </h3>
-                        <h3> $4.99 per month</h3>
-                </div>
+                <h3> Select the access you need.Enter your payment information to start your monthly subscription</h3>
+                <div class="row vdivide" style = "margin-top:5rem;">
+                <div class="col-sm-6" align="justify" style="padding-left :20rem;">
+                <fieldset >      
+                    <legend><input type="radio" id="single" name="select" value="true"
+                        checked onclick="totalprice()">&nbsp; Single Search Only</legend>      
+                    <input type="checkbox" name="singlesearch" value="Cats" id="single1" onclick="totalprice()">&nbsp;Arizona = $5.00 per month &nbsp;<br>      
+                    <input type="checkbox" name="singlesearch" value="Cats" id="single2" onclick="totalprice()">&nbsp;New Mexico = $5.00 per month<br>
+                    <input type="checkbox" name="singlesearch" value="Cats" id="single3" onclick="totalprice()">&nbsp;Nevada = $5.00 per month<br>
+                    <input type="checkbox" name="singlesearch" value="Cats" id="single4" onclick="totalprice()">&nbsp;Colorado = $5.00 per month<br>    
+                    <input type="checkbox" name="singlesearch" value="Cats" id="single5" onclick="totalprice()">&nbsp;All four states = $20.00 per month<br>
+                    
+                </fieldset> 
+                </div>  
+                <div class="col-sm-6" align="justify" style="padding-left :20rem;">  
+                <fieldset >     
+                    <legend><input type="radio" id="singleandbatch" name="select" value="false" onclick="totalprice()"> &nbsp;Single And Batch Search</legend> 
+                    <input type="checkbox" name="singlesearch" value="Cats" id="batch1"  onclick="totalprice()">&nbsp;Arizona = $10.00 per month<br>      
+                    <input type="checkbox" name="singlesearch" value="Cats" id="batch2" onclick="totalprice()">&nbsp;New Mexico = $10.00 per month<br>
+                    <input type="checkbox" name="singlesearch" value="Cats" id="batch3" onclick="totalprice()">&nbsp;Nevada = $10.00 per month<br>
+                    <input type="checkbox" name="singlesearch" value="Cats" id="batch4" onclick="totalprice()">&nbsp;Colorado = $10.00 per month<br>    
+                    <input type="checkbox" name="singlesearch" value="Cats" id="batch5" onclick="totalprice()">&nbsp;All four states = $40.00 per month<br>
+                         
+                </fieldset> 
+                 
+            </div> 
+            <h4 id="total">Total Price is $0 per month</h4>
+            </div>  
+           
+        </div>
                 <% }%>      
         <% } %> 
        
        
         <% if(currentUser){ %>
 
-        <div class="col-md-12 text-center" style="padding-top:10rem;">
+        <div class="col-md-12 text-center" style="padding-top:3rem;">
             <% if(currentUser.subscription){ %>
+                <% if(currentUser.accessid.charCodeAt(0) <= 90){ %>
                 <h2>Batch Search</h2>
-            <form ref='uploadForm' id='uploadForm' action='/upload/<%= currentUser.username %>' method='post' encType="multipart/form-data" class="form-inline">
+            <form ref='uploadForm' id='uploadForm' action='/upload?username=<%= currentUser.username %>&accessid=<%= currentUser.accessid %>' method='post' encType="multipart/form-data" class="form-inline">
                 <!-- COMPONENT START -->
                 <h3>Select the file format you will upload</h3>
                 <table class=" table table-responsive">
@@ -214,6 +249,7 @@ Please refer to our home page for a current development map.
                                 </tr>
                         </tbody>
                </table>
+               
                     <div class="input-group input-file text-center " name="Fichier1">
                         <span class="input-group-btn">
                             <input type="file" class="btn btn-default" name="sampleFile">Choose</input>
@@ -224,6 +260,7 @@ Please refer to our home page for a current development map.
                     </div>
                 <!-- COMPONENT END -->
             </form>
+            
            <!--  <form ref='uploadForm' id='uploadForm' action='/download' method='POST' encType="multipart/form-data" style = "padding-top: 3rem">
                 < COMPONENT START
                 <div class="form-group">
@@ -276,10 +313,106 @@ Please refer to our home page for a current development map.
                 </div>
                 COMPONENT END
             </form>  -->
+            <% } %>
             <% } else {%>
-            <form action='/charge/<%= currentUser.username %>' method="POST" style="margin-top:10rem;">
-                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-                    data-key="pk_test_zmpaHB8D8mG8P56fS2QUdisz" data-amount="499" data-name="Welcome to your payment"
+            <form action='/charge/<%= currentUser.username %>' method="POST" style="margin-top:1rem;">
+                <input type="hidden" name="accessid" id="searchaccess"/>
+                <script>
+                    /* radio check listener */
+                    function totalprice() {
+                        var totalprice = 0;
+                        var accessid = "";
+                        if(document.getElementById("single").checked == true) {
+                            totalprice = 0;
+                         document.getElementById("batch1").checked = false;
+                         document.getElementById("batch2").checked = false;
+                         document.getElementById("batch3").checked = false;
+                         document.getElementById("batch4").checked = false;
+                         document.getElementById("batch5").checked = false;
+                         var checkBox1 = document.getElementById("single1");
+                         var checkBox2 = document.getElementById("single2");
+                         var checkBox3 = document.getElementById("single3");
+                         var checkBox4 = document.getElementById("single4");
+                         var checkBox5 = document.getElementById("single5");
+                         
+                         
+                         if (checkBox1.checked == true){
+                             totalprice = totalprice + 5;
+                            accessid = accessid +"a";
+                         } 
+                         if (checkBox2.checked == true){
+                             totalprice = totalprice + 5;
+                             accessid = accessid +"b";
+                         } 
+                         if (checkBox3.checked == true){
+                             totalprice = totalprice + 5;
+                             accessid = accessid +"c";
+                         } 
+                         if (checkBox4.checked == true){
+                             totalprice = totalprice + 5;
+                             accessid = accessid +"d";
+                         } if (checkBox5.checked == true){
+                             totalprice = 20;
+                             accessid = "abcd";
+                         } 
+                         var price = document.getElementById("total").innerHTML = `Total Price is $${totalprice} per month`;
+                     }
+                
+                     if(document.getElementById("singleandbatch").checked == true) {
+                         var checkBox1 = document.getElementById("batch1");
+                         var checkBox2 = document.getElementById("batch2");
+                         var checkBox3 = document.getElementById("batch3");
+                         var checkBox4 = document.getElementById("batch4");
+                         var checkBox5 = document.getElementById("batch5");
+                         document.getElementById("single1").checked = false;
+                         document.getElementById("single2").checked = false;
+                         document.getElementById("single3").checked = false;
+                         document.getElementById("single4").checked = false;
+                         document.getElementById("single5").checked = false;
+                         
+                          totalprice = 0;
+                          accessid = "";
+                         if (checkBox1.checked == true){
+                             totalprice = totalprice + 10;
+                             accessid = accessid +"A";
+                         } 
+                         if (checkBox2.checked == true){
+                             totalprice = totalprice + 10;
+                             accessid = accessid +"B";
+                         } 
+                         if (checkBox3.checked == true){
+                             totalprice = totalprice + 10;
+                             accessid = accessid +"C";
+                         } 
+                         if (checkBox4.checked == true){
+                             totalprice = totalprice + 10;
+                             accessid = accessid +"D";
+                         } if (checkBox5.checked == true){
+                             totalprice = 40;
+                             accessid = "ABCD";
+                         } 
+                         var price = document.getElementById("total").innerHTML = `Total Price is $${totalprice} per month`;  
+                     }
+
+                     document.getElementById("searchaccess").value =accessid;
+
+                     var payscript = document.getElementById("payment");
+                     payscript.setAttribute("data-amount", `${totalprice}00`);
+                  /*    var url = "https://checkout.stripe.com/checkout.js";
+                     var classstripe = "stripe-button";
+                     var key = "pk_test_zmpaHB8D8mG8P56fS2QUdisz"; var amount = `${totalprice}00`;
+                     var description = "You should pay monthly fee"; var imageurl = "https://stripe.com/img/documentation/checkout/marketplace.png";
+                     var locale = "auto"; var iszipcode = "true";
+                    document.write("<script type='text/javascript' src='"+ x + "'><\/scr" + "ipt>");
+                    document.write("<script src='"+ url + "' ><\/scr" + "ipt>") */
+
+                 }
+                   
+                     
+                 </script>
+                 
+                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button" id = "payment"
+                    data-key="pk_test_zmpaHB8D8mG8P56fS2QUdisz"  data-name="Welcome to your payment"
                     data-description="You should pay monthly fee"
                     data-image="https://stripe.com/img/documentation/checkout/marketplace.png" data-locale="auto"
                     data-zip-code="true">
@@ -289,11 +422,10 @@ Please refer to our home page for a current development map.
                     document.getElementsByClassName('stripe-button-el')[0]
                         .style.display = 'none';
                 </script>
-                <button type="submit" class="btn btn-primary btn-outline-dark text-white btn-lg" >
-                        Subscribe $4.99/month
+                <button type="submit" class="btn btn-primary  text-white btn-lg" id="dragonskin">
+                        Subscribe
                 </button>
             </form>
-
             <% }%>
             <% }%>
 
@@ -360,35 +492,7 @@ data="https://www.youtube.com/v/tgbNymZ7vqY">
 
 <% } %>
 
-<!-- <div class="row text-center landing-header" style="display:flex; flex-wrap: wrap;">
-        
-            <% if(campgrounds !== null  ) { %>
-                <% campgrounds.forEach(function(campground){ %>
-                    <div class="col-md-3 col-sm-6 "name = "display">
-                        <div class="thumbnail">
-                                
-                        <div class="caption">
-                            <h3> <%= campground.search %> </h3>
-                            <h3>=</h3>
-                            <h3><%= campground.courtName %>  Court</h3>
-                            <h4><%= campground.address %></h4>
-                            <h4><%= campground.phone %></h4>
-                               
-                        </div>
-                        </div>
-                    </div>
-                    
-                <% }); %>
-        <% } %>
-      
-    </div> -->
-<!-- <ul class="slideshow">
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-</ul> -->
+
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
@@ -427,5 +531,6 @@ data="https://www.youtube.com/v/tgbNymZ7vqY">
         });
     }
 </script>
+
 <% }%>
 <% include ../partials/footer %>

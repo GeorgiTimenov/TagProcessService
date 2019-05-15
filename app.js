@@ -160,7 +160,12 @@ app.use("/campgrounds/:id/comments", commentRoutes);
 // default options;
 
 app.use(fileUpload());
-app.post('/upload/:id', function(req, res) {
+app.post('/upload', function(req, res) {
+  
+  console.log(req.query.username);
+  console.log(req.query.accessid);
+  var username = req.query.username;
+  var accessid = req.query.accessid;
   let sampleFile;
   let uploadPath;
   let path = "";
@@ -174,10 +179,10 @@ app.post('/upload/:id', function(req, res) {
   console.log("minetype=>"+ req.files.sampleFile.mimetype);
     if(req.files.sampleFile.mimetype == 'application/vnd.ms-excel') {
     sampleFile = req.files.sampleFile;
-    //console.log("DateType=>"+typeof(Date.now()));
+    console.log("DateType=>"+typeof(Date.now()));
 
     path = makeid(10);
-    //console.log("Date=>"+Date.now());
+    console.log("Date=>"+Date.now());
 
     uploadPath = __dirname + '/uploads/' + path +sampleFile.name;
      console.log(" => "+uploadPath);
@@ -202,7 +207,7 @@ a,b,c
   //.fromFile(csvFilePath)
   //.then((jsonObj)=>{
 
-      //console.log(jsonObj);
+      console.log(jsonObj);
       /**
        * [
        * 	{a:"1", b:"2", c:"3"},
@@ -250,6 +255,19 @@ a,b,c
             if ((searchzip[i] > 80000 && searchzip[i] < 81659)) {   //Colorado 
               regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
               console.log(regex[i]+" "+i);
+              if((accessid.includes("d") ==false)&&(accessid.includes("D") ==false)) {
+                var temp ={};
+                        var errortext = `Your court information could not be found. You do not have access to this area. Contact us, if you would like to add this area to your subscription.` ;
+                                              temp.search = result[i];
+                                              temp.fileNum = fileNum[i];
+                                              temp.num = 0;
+                                              temp.courtName = errortext;
+                                              temp.address = " ";
+                                              temp.phone = null;
+                                              temp.filingFee = null;
+                                              temp.courtType = null;
+                                              searchData.push(temp);     
+              } else {
               await Campground.findOne({zipcodes:regex[i]}, function(err, allCampgrounds){
                 if(err){
                         console.log(err);
@@ -288,10 +306,23 @@ a,b,c
                         
                     } 
               }) 
+            }
             } else if ((searchzip[i] >= 85117 && searchzip[i] <= 85194)||(searchzip[i] == 85618 || searchzip[i] == 85623 || searchzip[i] ==85631) ) {  //Pinal
               var fetchstring = 'https://maps.googleapis.com/maps/api/geocode/json?address='+result[i]+'&key=AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI';      
               regex[i] = await getquerypinal(fetchstring);
-            
+              if((accessid.includes("a") ==false)&&(accessid.includes("A") ==false)) {
+                var temp ={};
+                        var errortext = `Your court information could not be found. You do not have access to this area. Contact us, if you would like to add this area to your subscription.` ;
+                                              temp.search = result[i];
+                                              temp.fileNum = fileNum[i];
+                                              temp.num = 0;
+                                              temp.courtName = errortext;
+                                              temp.address = " ";
+                                              temp.phone = null;
+                                              temp.filingFee = null;
+                                              temp.courtType = null;
+                                              searchData.push(temp);     
+              } else {
                await pinal.findOne({courtName:regex[i]}, function(err, allCampgrounds){
                 if(err){
                         console.log(err);
@@ -332,9 +363,7 @@ a,b,c
               }
               })
                 console.log(regex[i]+" "+i);
-
-                
-                         
+        
               await  Az_county.findOne({countyname:"Pinal County"}, function(err, allCampgrounds){////////
                   if(err){
                           console.log(err);
@@ -368,11 +397,26 @@ a,b,c
                         
               });
                      
-    
+            }
             }
             else if ((searchzip[i] >= 85001 && searchzip[i] <= 85087)||(searchzip[i] >= 85201 && searchzip[i] <= 85390)) {     
               var fetchstring = 'https://maps.googleapis.com/maps/api/geocode/json?address='+result[i]+'&key=AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI';      
               regex[i] = await getquery(fetchstring);
+
+              if((accessid.includes("a") ==false)&&(accessid.includes("A") ==false)) {
+                var temp ={};
+                        var errortext = `Your court information could not be found. You do not have access to this area. Contact us, if you would like to add this area to your subscription.` ;
+                                              temp.search = result[i];
+                                              temp.fileNum = fileNum[i];
+                                              temp.num = 0;
+                                              temp.courtName = errortext;
+                                              temp.address = " ";
+                                              temp.phone = null;
+                                              temp.filingFee = null;
+                                              temp.courtType = null;
+                                              searchData.push(temp);     
+              } else {
+
                await maricopa.findOne({courtName:regex[i]}, function(err, allCampgrounds){
                 if(err){
                         console.log(err);
@@ -445,11 +489,24 @@ a,b,c
                           } 
                         });
                
-    
+                  }
             } else if (searchzip[i] >= 87001 && searchzip[i] <= 88439) {
              
               regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
               console.log("cities"+ regex[i]);
+              if((accessid.includes("b") ==false)&&(accessid.includes("B") ==false)) {
+                var temp ={};
+                        var errortext = `Your court information could not be found. You do not have access to this area. Contact us, if you would like to add this area to your subscription.` ;
+                                              temp.search = result[i];
+                                              temp.fileNum = fileNum[i];
+                                              temp.num = 0;
+                                              temp.courtName = errortext;
+                                              temp.address = " ";
+                                              temp.phone = null;
+                                              temp.filingFee = null;
+                                              temp.courtType = null;
+                                              searchData.push(temp);     
+              } else {
              await Newmexico.find({zipcodes:regex[i]}, function(err, allCampgrounds){
                   if(err){
                           console.log(err);
@@ -497,8 +554,22 @@ a,b,c
                   
                               
               });
+            }
             } else if (searchzip[i] >= 89001 && searchzip[i] <= 89883 ) {
               regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
+              if((accessid.includes("c") ==false)&&(accessid.includes("C") ==false)) {
+                var temp ={};
+                        var errortext = `Your court information could not be found. You do not have access to this area. Contact us, if you would like to add this area to your subscription.` ;
+                                              temp.search = result[i];
+                                              temp.fileNum = fileNum[i];
+                                              temp.num = 0;
+                                              temp.courtName = errortext;
+                                              temp.address = " ";
+                                              temp.phone = null;
+                                              temp.filingFee = null;
+                                              temp.courtType = null;
+                                              searchData.push(temp);     
+              } else {
             await  Nevada.find({zipcodes:regex[i]}, function(err, allCampgrounds){
                   if(err){
                           console.log(err);
@@ -546,10 +617,23 @@ a,b,c
                   
                   }              
               });
-
+            }
             } else if(  (searchzip >= 85532 && searchzip <= 85554)||(searchzip >= 85601 && searchzip <= 85658)||(searchzip >= 85670 && searchzip <= 86556)) {
               
               regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
+              if((accessid.includes("a") ==false)&&(accessid.includes("A") ==false)) {
+                var temp ={};
+                        var errortext = `Your court information could not be found. You do not have access to this area. Contact us, if you would like to add this area to your subscription.` ;
+                                              temp.search = result[i];
+                                              temp.fileNum = fileNum[i];
+                                              temp.num = 0;
+                                              temp.courtName = errortext;
+                                              temp.address = " ";
+                                              temp.phone = null;
+                                              temp.filingFee = null;
+                                              temp.courtType = null;
+                                              searchData.push(temp);     
+              } else {
             await  Arizona_zip.findOne({zipcodes:regex}, function(err, allCampgrounds){
                 if(err){
                         console.log(err);
@@ -587,7 +671,7 @@ a,b,c
                         return response.json();
                     })
                     .then(function (myJson) {
-                        //console.log(JSON.stringify(myJson));
+                        console.log(JSON.stringify(myJson));
                          var countyname = myJson.results[0].address_components[2].long_name;
                        console.log(JSON.stringify(countyname));
                      
@@ -628,6 +712,7 @@ a,b,c
                     });
 
             }
+          }
             else {
               regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
               console.log(regex[i]+" "+i);
@@ -644,7 +729,7 @@ a,b,c
                                     searchData.push(temp); 
     
             }
-          //console.log("address_res =>"+ JSON.stringify(address_position));
+          console.log("address_res =>"+ JSON.stringify(address_position));
          /*  var address_latlng = address_position.results[0].geometry.location;
           var courtname = searchmaricopa(address_latlng);
           console.log("AZ =>"+ courtname); var address_position = 
@@ -654,8 +739,8 @@ a,b,c
 
 
 
-        if(req.params.id) {
-          User.find({username:req.params.id}, function(err, user){
+        if(username) {
+          User.find({username:username}, function(err, user){
               if(err){
                   console.log(err);
                   res.redirect("/search");
@@ -691,7 +776,7 @@ a,b,c
       var header =["File Number","Input Address","Distric Number","Court Type", "Court Name","Court Address","Phone Number","Filing Fee","Distric Number","Court Type", "Court Name","Court Address","Phone Number","Filing Fee"];
           output.push(header.join());
           let row = [];
-          //console.log(JSON.stringify(searchData));
+          console.log(JSON.stringify(searchData));
         await  searchData.forEach(async (d) => {
              // a new array for each row of data
              if (d.num ==0 ) {
@@ -745,7 +830,7 @@ a,b,c
 
             
             
-            //console.log("row =>" +row); // by default, join() uses a ','
+            console.log("row =>" +row); // by default, join() uses a ','
         await fs.writeFileSync(outputPath, output.join(os.EOL)); 
           });
           console.log("outputpath=>"+outputPath);
@@ -788,23 +873,115 @@ a,b,c
 }
 }); */
 /* stripe.products.create({
-  name: 'Monthlymembership',
+  name: 'singlebatchsearch',
   type: 'service',
 }, function(err, product) {
   console.log(JSON.stringify(product.id));
 }); */
+
 /* stripe.plans.create({
     
-  amount: 499,
-  nickname :"monthlymember",
+  amount: 4000,
+  nickname :"batchmonthlymember40",
   interval: "month",
-  product: "prod_EhmDEDQNzYXrp1",
+  product: "prod_F3FYjoVwslkAOO",
   currency: "usd",
 }, function(err, plan) {
   // asynchronously called
   console.log(JSON.stringify(plan.id));
 }); */
 app.post('/charge/:id',(req,res) =>{
+  
+  console.log("REQ:=>"+req.body.accessid);
+  var accessid = req.body.accessid;
+  var planid = "";
+  var day;
+  console.log(accessid.charCodeAt(0));
+switch (accessid.length) {
+  case 1:
+  if(accessid.charCodeAt(0) <= 90) {
+    planid = "plan_F3FbAYYdIZ4xRf";
+  } //$10 per month
+  else {
+    planid = "plan_F3FOlWNXju3VK0";
+  } //$5 per month
+    break;
+  case 2:
+  if(accessid.charCodeAt(0) <= 90) {
+    planid = "plan_F3FcOiuKXLYGPb";
+  } //20
+  else {
+    planid = "plan_F3FQmLBrbcTnvP";
+  } //10
+    break;
+  case 3:
+  if(accessid.charCodeAt(0) <= 90) {
+    planid = "plan_F3FcwUpbKxZBNh";
+  } //30
+  else {
+    planid = "plan_F3FSIG40SEoldK";
+  } //15
+    break;
+  case 4:
+  if(accessid.charCodeAt(0) <= 90) {
+    planid = "plan_F3GJUsFHKRlu4S";
+  } //40
+  else {
+    planid = "plan_F3FTxsAHm0dBk1";
+  } //20
+    break;
+}
+  
+  stripe.customers.create({
+    email:req.body.stripeEmail,
+    source : req.body.stripeToken
+  })
+  .then(customer => stripe.subscriptions.create({
+    customer :customer.id,
+    items :[{
+      plan: planid,
+    },]
+    
+  }, function(err,subscription){
+    console.log(err);
+    console.log(subscription);
+    var today = new Date(Date.now());
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+    if (dd < 10) {
+      dd = '0' + dd;
+    }
+    if (mm < 10) {
+      mm = '0' + mm;
+    }
+    var today = dd + '/' + mm + '/' + yyyy;
+
+    User.findOneAndUpdate({ username: req.params.id }, { $set: { email: req.body.stripeEmail,customerid:customer.id,subscription:true,accessid: accessid,subscriptionDate:today}}, { new: true }, function(err, doc) {
+     
+        if (err) {
+            console.log("Something wrong when updating data!");
+        }
+        console.log(doc);
+    });
+    req.flash("success", req.params.id+", Your subscription was set correctly");
+    res.redirect("/search");
+
+    //res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." });
+   
+  })
+    
+    /* stripe.charges.create({
+    amount,
+    description :'Tag Process Service Court Locator',
+    currency : 'usd',
+    customer: customer.id
+  } )*/
+  )
+  //.then(subscription => res.render("campgrounds/index",{campgrounds:null,noMatch:"Thank you for your payment." }));
+
+});
+app.post('/chargemore/:id',(req,res) =>{
   
   
   stripe.customers.create({
@@ -814,7 +991,7 @@ app.post('/charge/:id',(req,res) =>{
   .then(customer => stripe.subscriptions.create({
     customer :customer.id,
     items :[{
-      plan:"plan_EhmFZfOrbwBWKV",
+      plan:"prod_F2gRnmeBcubeEg",
     },]
     
   }, function(err,subscription){
@@ -830,7 +1007,7 @@ app.post('/charge/:id',(req,res) =>{
     }
     var today = dd + '/' + mm + '/' + yyyy;
 
-    User.findOneAndUpdate({ username: req.params.id }, { $set: { email: req.body.stripeEmail,customerid:customer.id,subscription:true,subscriptionDate:today}}, { new: true }, function(err, doc) {
+    User.findOneAndUpdate({ username: req.params.id }, { $set: { email: req.body.stripeEmail,customerid:customer.id,subscription2:true,subscriptionDate:today}}, { new: true }, function(err, doc) {
      
         if (err) {
             console.log("Something wrong when updating data!");
@@ -906,23 +1083,28 @@ app.post('/getsearch/:id', function (req,res) {
   console.log(req.body);
   var searchData =[];
     
-    //console.log(req);
+    console.log(req);
     if(req.body.text ) {
         var result;
         var searchquery=[];
-        var searchzip =[]
+        var searchzip =[];
+        var accessid = req.body.accessid;
         result = req.body.text;
-        //console.log(typeof(req.query.search));
-        //console.log("result "+result.length);
+        console.log(typeof(req.query.search));
+        console.log("result "+result.length);
         if(result.length <= 13) {
           var error = "error"
            res.send(error);
-
+            
         } else {
             searchquery = result.slice(result.length-6,result.length).trim();
             searchzip= parseInt(searchquery);
             if ((searchzip > 80000 && searchzip < 81659) ) {
                 regex = new RegExp(escapeRegex(searchquery), 'gi');
+                if((accessid.includes("d") ==false)&&(accessid.includes("D") ==false)) {
+                  var error = "accesserror"
+                  res.send(error);     
+                } else {
                 Campground.findOne({zipcodes:regex}, function(err, allCampgrounds){
                     if(err){
                             console.log(err);
@@ -980,8 +1162,13 @@ app.post('/getsearch/:id', function (req,res) {
                     
                                 
                 });
+              }
             }  else if( (searchzip >= 85532 && searchzip <= 85554)||(searchzip >= 85601 && searchzip <= 85658)||(searchzip >= 85670 && searchzip <= 86556)) {
-              regex = new RegExp(escapeRegex(searchquery), 'gi');
+
+              if((accessid.includes("a") ==false)&&(accessid.includes("A") ==false)) {
+                var error = "accesserror"
+                res.send(error);     
+              } else {
                 Arizona_zip.findOne({zipcodes:regex}, function(err, allCampgrounds){
                     if(err){
                             console.log(err);
@@ -1047,7 +1234,7 @@ app.post('/getsearch/:id', function (req,res) {
                         return response.json();
                     })
                     .then(function (myJson) {
-                        //console.log(JSON.stringify(myJson));
+                        console.log(JSON.stringify(myJson));
                          var countyname = myJson.results[0].address_components[2].long_name;
                        console.log(JSON.stringify(countyname));
                      
@@ -1120,17 +1307,22 @@ app.post('/getsearch/:id', function (req,res) {
                     });
                     });
 
+                  }
             }
             else if((searchzip >= 85117 && searchzip <= 85194)||(searchzip == 85618 || searchzip == 85623 || searchzip ==85631)) {
+              if((accessid.includes("a") ==false)&&(accessid.includes("A") ==false)) {
+                var error = "accesserror"
+                res.send(error);     
+              } else {
               var fetchstring = 'https://maps.googleapis.com/maps/api/geocode/json?address='+result+'&key=AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI'
               fetch(fetchstring)
                   .then(function (response) {
                       return response.json();
                   })
                   .then(function (myJson) {
-                      //console.log(JSON.stringify(myJson));
+                      console.log(JSON.stringify(myJson));
                      var address_position = myJson.results[0].geometry.location;
-                     //console.log(JSON.stringify(address_position));
+                     console.log(JSON.stringify(address_position));
                      var courtname = searchpinal(address_position);
                      console.log("AZ =>"+ courtname);
                      regex =courtname;
@@ -1263,19 +1455,24 @@ app.post('/getsearch/:id', function (req,res) {
                               
               });
                   });
+                }
             }
             else if ((searchzip >= 85001 && searchzip <= 85087)||(searchzip >= 85201 && searchzip <= 85390) ) {     //maricopa county logic
               /* maricopa.num = i; maricopa.address = result[i];
               paramadrress.push(maricopa); */
+              if((accessid.includes("a") ==false)&&(accessid.includes("A") ==false)) {
+                var error = "accesserror"
+                res.send(error);     
+              } else {
               var fetchstring = 'https://maps.googleapis.com/maps/api/geocode/json?address='+result+'&key=AIzaSyA1T95uAq72g2rFXa1hhyJD3De1NdE6OxI'
             fetch(fetchstring)
                 .then(function (response) {
                     return response.json();
                 })
                 .then(function (myJson) {
-                    //console.log(JSON.stringify(myJson));
+                    console.log(JSON.stringify(myJson));
                    var address_position = myJson.results[0].geometry.location;
-                   //console.log(JSON.stringify(address_position));
+                   console.log(JSON.stringify(address_position));
                    var courtname = searchmaricopa(address_position);
                    console.log("AZ =>"+ courtname);
                    regex =courtname;
@@ -1366,13 +1563,17 @@ app.post('/getsearch/:id', function (req,res) {
                 });
              /* const syncReturn = syncFunction(result[i]);
               regex[i] =new RegExp(escapeRegex(syncReturn), 'gi');
-              //console.log("sycnReturn =>"+ syncReturn);
-              //console.log("regex =>"+i+"=>" +regex[i]);
+              console.log("sycnReturn =>"+ syncReturn);
+              console.log("regex =>"+i+"=>" +regex[i]);
               searchquery[i] = syncReturn; */
-                         
+              }
           } else if (searchzip >= 87001 && searchzip <= 88439) {
             regex = new RegExp(escapeRegex(searchquery), 'gi');
             console.log("cities"+ regex);
+            if((accessid.includes("b") ==false)&&(accessid.includes("B") ==false)) {
+              var error = "accesserror"
+              res.send(error);     
+            } else {
             Newmexico.find({zipcodes:regex}, function(err, allCampgrounds){
                 if(err){
                         console.log(err);
@@ -1430,8 +1631,12 @@ app.post('/getsearch/:id', function (req,res) {
                 
                             
             });
+          }
           } else if (searchzip >= 89001 && searchzip <= 89883 ) {
-            
+            if((accessid.includes("c") ==false)&&(accessid.includes("C") ==false)) {
+              var error = "accesserror"
+              res.send(error);     
+            } else {
             regex = new RegExp(escapeRegex(searchquery), 'gi');
             Nevada.find({zipcodes:regex}, function(err, allCampgrounds){
                 if(err){
@@ -1499,7 +1704,7 @@ app.post('/getsearch/:id', function (req,res) {
                 
                             
             });
-        
+          }
           }
           else{
               regex = new RegExp(escapeRegex(searchquery), 'gi'); 
@@ -1527,7 +1732,7 @@ app.post('/getsearch/:id', function (req,res) {
 })
 
 app.get('/history/:id',(req,res) =>{
-  //console.log(req);
+  console.log(req);
   Comment.find({username:req.params.id}, function(err, allhistory){
     if(err){
       console.log(req);
@@ -1574,7 +1779,7 @@ async function getquery(address) {
       }
     });
     //const data = await response.map(res => res );;
-    //console.log("response "+Object.keys(response));
+    console.log("response "+Object.keys(response));
    
     var courtname = searchmaricopa(response.data.results[0].geometry.location);
     console.log("=>"+courtname);
@@ -1596,7 +1801,7 @@ async function getquerypinal(address) {
       }
     });
     //const data = await response.map(res => res );;
-    //console.log("response "+Object.keys(response));
+    console.log("response "+Object.keys(response));
    
     var courtname = searchpinal(response.data.results[0].geometry.location);
     console.log("pinal=>"+courtname);
