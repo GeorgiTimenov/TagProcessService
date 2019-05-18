@@ -160,7 +160,7 @@ app.use("/campgrounds/:id/comments", commentRoutes);
 // default options;
 
 app.use(fileUpload());
-app.post('/upload', function(req, res) {
+app.post('/upload', async function(req, res) {
   
   console.log(req.query.username);
   console.log(req.query.accessid);
@@ -186,13 +186,12 @@ app.post('/upload', function(req, res) {
 
     uploadPath = __dirname + '/uploads/' + path +sampleFile.name;
      console.log(" => "+uploadPath);
-    sampleFile.mv(uploadPath, function(err) {
+  await  sampleFile.mv(uploadPath, function(err) {
       if (err) {
         res.redirect("/search");
         return res.status(500).send(err);
 
       }
-     
       
     });
     /** csv file
@@ -203,11 +202,11 @@ a,b,c
   const csvFilePath = uploadPath;
  
   const output = []; // holds all rows of data
-  //csv()
+ // csv()
   //.fromFile(csvFilePath)
   //.then((jsonObj)=>{
 
-      console.log(jsonObj);
+     // console.log(jsonObj);
       /**
        * [
        * 	{a:"1", b:"2", c:"3"},
@@ -215,8 +214,8 @@ a,b,c
        * ]
        */ 
       var inputbuff = [];
-     fs.createReadStream(csvFilePath) 
-     .pipe(csv())
+    await fs.createReadStream(csvFilePath) 
+     .pipe(csv(['filenum', 'address','city','state','zipcode']))
      .on('data', (data) => inputbuff.push(data))
      .on('headers', (headers) => {
       console.log(`First header: ${headers[0]}`)
@@ -232,7 +231,9 @@ a,b,c
       var conditionlength;
 
       (async ( ) => {
-      for (var i in inputbuff) {
+        var i;
+      for ( i in inputbuff) {
+
         console.log("JSON => "+JSON.stringify(inputbuff[i]));
         fileNum[i] = JSON.stringify(Object.values(inputbuff[i])[0]);
         console.log("Length=>" + Object.keys(inputbuff[i]).length);
@@ -301,7 +302,8 @@ a,b,c
                                               temp.phone = null;
                                               temp.filingFee = null;
                                               temp.courtType = null;
-                                              searchData.push(temp); 
+                                              searchData.push(temp);
+                                              
                       }
                         
                     } 
@@ -358,7 +360,7 @@ a,b,c
                   temp.filingFee = allCampgrounds.filingFee;
                   searchData.push(temp);
 
-                  console.log("Search Data =>"+JSON.stringify(searchData));                        
+                 // console.log("Search Data =>"+JSON.stringify(searchData));                        
                 } 
               }
               })
@@ -389,7 +391,7 @@ a,b,c
                         temp.filingFee = allCampgrounds.filingFee;
                         temp.courtType = allCampgrounds.courtType;
                         searchData.push(temp); 
-                          console.log("Search Data =>"+JSON.stringify(searchData));
+                         // console.log("Search Data =>"+JSON.stringify(searchData));
                           
                       }
                       } 
@@ -453,7 +455,7 @@ a,b,c
                   temp.filingFee = allCampgrounds.filingFee;
                   searchData.push(temp);
 
-                  console.log("Search Data =>"+JSON.stringify(searchData));                        
+                 // console.log("Search Data =>"+JSON.stringify(searchData));                        
                 } 
               } 
               })
@@ -483,7 +485,7 @@ a,b,c
                             temp.filingFee = allCampgrounds.filingFee;
                             temp.courtType = allCampgrounds.courtType;
                             searchData.push(temp); 
-                              console.log("Search Data =>"+JSON.stringify(searchData));
+                            //  console.log("Search Data =>"+JSON.stringify(searchData));
                               
                           }
                           } 
@@ -544,7 +546,7 @@ a,b,c
                                       temp.courtType = allCampground.courtType;
                                       searchData.push(temp); 
                                   })
-                          console.log("Search Data =>"+JSON.stringify(searchData));
+                         // console.log("Search Data =>"+JSON.stringify(searchData));
                           
                       } 
                      
@@ -702,7 +704,7 @@ a,b,c
                                               temp.filingFee = allCampgrounds.filingFee;
                                               temp.courtType = allCampgrounds.courtType;
                                               searchData.push(temp); 
-                                console.log("Search Data =>"+JSON.stringify(searchData));
+                              //  console.log("Search Data =>"+JSON.stringify(searchData));
                                 
                             }
                             } 
@@ -717,67 +719,66 @@ a,b,c
               regex[i] = new RegExp(escapeRegex(searchquery[i]), 'gi');
               console.log(regex[i]+" "+i);
               var temp ={};
-              var errortext = `Your court information could not be found. 1. Please verify your input address is a valid address. 2. The address might be located outside of our developed states. Please refer to our home page for a current development map.` ;
-                                    temp.search = result[i];
-                                    temp.fileNum = fileNum[i];
-                                    temp.num = 0;
-                                    temp.courtName = errortext;
-                                    temp.address = " ";
-                                    temp.phone = null;
-                                    temp.filingFee = null;
-                                    temp.courtType = null;
-                                    searchData.push(temp); 
-    
+              var errortext = `Your court information could not be found. 1. Please verify your input address is a valid address. 2. The address might be located outside of our developed states.Please refer to our home page for a current development map.` ;
+
+                temp.search = result[i];
+                temp.fileNum = fileNum[i];
+                temp.num = 0;
+                temp.courtName = errortext;
+                temp.address = " ";
+                temp.phone = null;
+                temp.filingFee = null;
+                temp.courtType = null;
+               // if( parseInt(temp.fileNum) !== NaN ) {
+                  //searchData.push(temp); 
+               // }
+                
             }
-          console.log("address_res =>"+ JSON.stringify(address_position));
-         /*  var address_latlng = address_position.results[0].geometry.location;
-          var courtname = searchmaricopa(address_latlng);
-          console.log("AZ =>"+ courtname); var address_position = 
-           */
-         
+        
+       
+        }
+
+        if(username) {
+          User.find({username:req.query.username}, function(err, user){
+            if (err) {
+              console.log(err);
+              res.redirect("/search");
+            } else {
+              searchData.forEach((data,index) => {
+                  Comment.create(data, function(err, comment){
+                      if(err){
+                          
+                          console.log(err);
+                      } else {
+                          //add username and id to comment
+                          
+                          comment.username = req.query.username;
+                          comment.search = data.search;
+                          comment.courtName = data.courtName;
+                          comment.address = data.address;
+                          comment.phone = data.phone;
+                          comment.filingFee = data.filingFee;
+                          //save comment
+                          comment.save();
+                        //   console.log(comment);
+                          
+                      }
+                    });
+              });
+            }
+          });
+     
         }
 
 
-
-        if(username) {
-          User.find({username:username}, function(err, user){
-              if(err){
-                  console.log(err);
-                  res.redirect("/search");
-              } else {
-                  searchData.forEach((data,index) => {
-                      Comment.create(data, function(err, comment){
-                          if(err){
-                              
-                              console.log(err);
-                          } else {
-                              //add username and id to comment
-                             
-                              comment.username = req.params.id;
-                              comment.search = data.search;
-                              comment.courtName = data.courtName;
-                              comment.address = data.address;
-                              comment.phone = data.phone;
-                              comment.filingFee = data.filingFee;
-                              //save comment
-                              comment.save();
-                           //   console.log(comment);
-                              
-                          }
-                       });
-                  });
-              }
-          });
-     
-          }
-
-
-        outputPath = __dirname + '/uploads/'+ path+'.csv';
-      var header =["File Number","Input Address","Distric Number","Court Type", "Court Name","Court Address","Phone Number","Filing Fee","Distric Number","Court Type", "Court Name","Court Address","Phone Number","Filing Fee"];
-          output.push(header.join());
-          let row = [];
-          console.log(JSON.stringify(searchData));
-        await  searchData.forEach(async (d) => {
+      
+      var header =["File Number","Input Address","Distric Number","Court Type", "Court Name",
+        "Court Address","Phone Number","Filing Fee","Distric Number","Court Type", "Court Name",
+        "Court Address","Phone Number","Filing Fee"];
+      output.push(header.join());
+      let row = [];
+       console.log(JSON.stringify(searchData));
+      await  searchData.forEach(async (d) => {
              // a new array for each row of data
              if (d.num ==0 ) {
               row.push(d.fileNum);
@@ -829,11 +830,12 @@ a,b,c
           }
 
             
-            
-            console.log("row =>" +row); // by default, join() uses a ','
+          outputPath = __dirname + '/uploads/'+ path+'.csv';
+          //  console.log("row =>" +row); // by default, join() uses a ','
         await fs.writeFileSync(outputPath, output.join(os.EOL)); 
           });
           console.log("outputpath=>"+outputPath);
+      
           try {
             if (fs.existsSync(outputPath)) {
               //file exists
@@ -1264,7 +1266,7 @@ app.post('/getsearch/:id', function (req,res) {
                                             temp.courtType = allCampgrounds.courtType;
                                             temp.filingFee = allCampgrounds.filingFee;
                                             searchData.push(temp); 
-                                console.log("Search Data =>"+JSON.stringify(searchData));
+                               // console.log("Search Data =>"+JSON.stringify(searchData));
                                 res.send(searchData);
                              
                             }
@@ -1346,7 +1348,7 @@ app.post('/getsearch/:id', function (req,res) {
                                           temp.courtType = allCampgrounds.courtType;
                                           temp.filingFee = allCampgrounds.filingFee;
                                           searchData.push(temp); 
-                              console.log("Search Data =>"+JSON.stringify(searchData));
+                             // console.log("Search Data =>"+JSON.stringify(searchData));
                               
                             }
                           }
@@ -1414,7 +1416,7 @@ app.post('/getsearch/:id', function (req,res) {
                                       temp.courtType = allCampgrounds.courtType;
                                       temp.filingFee = allCampgrounds.filingFee;
                                       searchData.push(temp); 
-                          console.log("Search Data =>"+JSON.stringify(searchData));
+                         // console.log("Search Data =>"+JSON.stringify(searchData));
                           res.send(searchData);
                       }
                       } 
@@ -1490,7 +1492,7 @@ app.post('/getsearch/:id', function (req,res) {
                                         temp.courtType = allCampgrounds.courtType;
                                         temp.filingFee = allCampgrounds.filingFee;
                                         searchData.push(temp); 
-                            console.log("Search Data =>"+JSON.stringify(searchData));
+                           // console.log("Search Data =>"+JSON.stringify(searchData));
                             
                         }       
                 });
@@ -1518,7 +1520,7 @@ app.post('/getsearch/:id', function (req,res) {
                                             temp.courtType = allCampgrounds.courtType;
                                             temp.filingFee = allCampgrounds.filingFee;
                                             searchData.push(temp); 
-                                console.log("Search Data =>"+JSON.stringify(searchData));
+                                //console.log("Search Data =>"+JSON.stringify(searchData));
                                 res.send(searchData);
                              
                             }
@@ -1591,7 +1593,7 @@ app.post('/getsearch/:id', function (req,res) {
                                     temp.courtType = allCampground.courtType;
                                     searchData.push(temp); 
                                 })
-                        console.log("Search Data =>"+JSON.stringify(searchData));
+                       // console.log("Search Data =>"+JSON.stringify(searchData));
                         
                     
                     res.send(searchData);
